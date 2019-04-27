@@ -28,71 +28,75 @@ station_parameters = water_quality_samples[['StationName'] + shared_parameters].
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = html.Div([
-    html.Div([
-        html.H1("Chesapeake Monitoring Cooperative")
-    ], style={
-        "textAlign": "center",
-        "padding-bottom": "10",
-        "padding-top": "10"}),
-    html.Div([
-        html.H2("County"),
-        dcc.Dropdown(id="county-selected",
-                     options=[{"label": group, "value": group} for group in cmc_stations["CityCounty"].dropna().unique()],
-                     value=[],
-                     multi=True,
-                     style={
-                         "display": "block",
-                         "margin-left": "auto",
-                         "margin-right": "auto",
-                         "width": "75%"
-                     }
-                     )
-    ]),
-    html.Div([
-        html.H2("Water Body"),
-        dcc.Dropdown(id="waterbody-selected",
-                     options=[{"label": group, "value": group} for group in cmc_stations["WaterBody"].dropna().unique()],
-                     value=[],
-                     multi=True,
-                     style={
-                         "display": "block",
-                         "margin-left": "auto",
-                         "margin-right": "auto",
-                         "width": "75%"
-                     }
-                     )
-    ]),
-    html.Div([
-        html.H2("Group Name"),
-        dcc.Dropdown(id="group-selected",
-                     options=[{"label": group, "value": group} for group in cmc_stations["GroupName"].unique()],
-                     value=[],
-                     multi=True,
-                     style={
-                         "display": "block",
-                         "margin-left": "auto",
-                         "margin-right": "auto",
-                         "width": "75%"
-                     }
-                     )
-    ]),
-    html.Div([
-        html.H2("Parameter"),
-        dcc.Dropdown(id="parameter-selected",
-                     options=[{"label": group, "value": group} for group in shared_parameters],
-                     value=[],
-                     multi=True,
-                     style={
-                         "display": "block",
-                         "margin-left": "auto",
-                         "margin-right": "auto",
-                         "width": "75%"
-                     }
-                     )
-    ]),
-    html.Div(dcc.Graph(id="main-map"))
-], className="container")
+navbar = dbc.NavbarSimple(
+    brand="Chesapeake Monitoring Cooperative",
+    brand_href="#",
+    sticky="top",
+)
+
+body = dbc.Container([
+    dbc.Row([
+        dbc.Col([
+            html.P("County"),
+            dcc.Dropdown(
+                id="county-selected",
+                options=[{"label": group, "value": group} for group in cmc_stations["CityCounty"].dropna().unique()],
+                value=[],
+                multi=True,
+                style={
+                    "display": "block",
+                    "margin-left": "auto",
+                    "margin-right": "auto",
+                    "width": "100%"
+                }
+            ),
+            html.P("Water Body"),
+            dcc.Dropdown(
+                id="waterbody-selected",
+                options=[{"label": group, "value": group} for group in cmc_stations["WaterBody"].dropna().unique()],
+                value=[],
+                multi=True,
+                style={
+                    "display": "block",
+                    "margin-left": "auto",
+                    "margin-right": "auto",
+                    "width": "100%"
+                }
+            ),
+            html.P("Group Name"),
+            dcc.Dropdown(
+                id="group-selected",
+                options=[{"label": group, "value": group} for group in cmc_stations["GroupName"].unique()],
+                value=[],
+                multi=True,
+                style={
+                    "display": "block",
+                    "margin-left": "auto",
+                    "margin-right": "auto",
+                    "width": "100%"
+                }
+            ),
+            html.P("Parameter"),
+            dcc.Dropdown(
+                id="parameter-selected",
+                options=[{"label": group, "value": group} for group in shared_parameters],
+                value=[],
+                multi=True,
+                style={
+                    "display": "block",
+                    "margin-left": "auto",
+                    "margin-right": "auto",
+                    "width": "100%"
+                }
+            )
+        ], md=3),
+        dbc.Col([
+            html.Div(dcc.Graph(id="main-map"))
+        ])
+    ])
+])
+
+app.layout = html.Div([navbar, body])
 
 
 @app.callback(
@@ -109,14 +113,14 @@ def update_figure(counties_selected, waterbodies_selected, groups_selected,
     trace = []
     filtered_stations = cmc_stations
     if counties_selected:
-        filtered_stations = cmc_stations[cmc_stations["CityCounty"].apply(lambda x: x in counties_selected)]
+        filtered_stations = filtered_stations[filtered_stations["CityCounty"].apply(lambda x: x in counties_selected)]
     if waterbodies_selected:
-        filtered_stations = cmc_stations[cmc_stations["WaterBody"].apply(lambda x: x in waterbodies_selected)]
+        filtered_stations = filtered_stations[filtered_stations["WaterBody"].apply(lambda x: x in waterbodies_selected)]
     if groups_selected:
-        filtered_stations = cmc_stations[cmc_stations["GroupName"].apply(lambda x: x in groups_selected)]
+        filtered_stations = filtered_stations[filtered_stations["GroupName"].apply(lambda x: x in groups_selected)]
     if parameters_selected:
         mask = station_parameters[parameters_selected].all(axis=1)
-        filtered_stations = cmc_stations[cmc_stations["Name"].apply(lambda x: x in station_parameters[mask].index)]
+        filtered_stations = filtered_stations[filtered_stations["Name"].apply(lambda x: x in station_parameters[mask].index)]
 
     if filtered_stations.shape != cmc_stations.shape:
         data_complement = cmc_stations[cmc_stations["Name"].apply(lambda x: x not in filtered_stations["Name"])]
