@@ -29,13 +29,13 @@ app.layout = html.Div([
     html.Div([
         dcc.Dropdown(id="group-selected",
                      options=[{"label": group, "value": group} for group in all_stations["GroupName"].unique()],
-                     value=None,
+                     value=[],
                      multi=True,
                      style={
                          "display": "block",
                          "margin-left": "auto",
                          "margin-right": "auto",
-                         "width": "50%"
+                         "width": "75%"
                      }
                      )
     ]),
@@ -50,7 +50,7 @@ app.layout = html.Div([
 )
 def update_figure(selected):
     trace = []
-    if selected is None:
+    if not selected:
         filtered_stations = all_stations
     else:
         filtered_stations = all_stations[all_stations["GroupName"].apply(lambda x: x in selected)]
