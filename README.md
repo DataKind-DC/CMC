@@ -1,5 +1,4 @@
-# CMC
-Chesapeake Monitoring Cooperative
+# Chesapeake Monitoring Cooperative
 
 ## App
 
