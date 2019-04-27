@@ -1,4 +1,4 @@
-Id,Code,Name,NameLong,Description,Lat,Long,Cbseg,Datum,CityCounty,Fips,Huc12,Huc6Name,State,Tidal,WaterBody,Comments,Status,CreatedBy,CreatedDate,ModifiedBy,ModifiedDate,StationSamplingMethodId
+Id,Code,Name,NameLong,Description,Lat,Long,Cbseg,Datum,CityCounty,Fips,Huc12,Huc6Name,State,Tidal,WaterBody,Comments,Status,CreatedBy,CreatedDate,ModifiedBy,ModifiedDate,StationSamplingMethodId,GroupName
 62,VIMS.GI,GI,,Goodwin Island (NERRS),37.21722,-76.392222,,NAD83,York County,51199,020801080101,Lower Chesapeake,Virginia,TRUE,Poquoson River-Lower Chesapeake Bay,testing,TRUE,,1900-01-01T00:00:00Z,96e7511e-704d-4790-aeae-f5a0043edf31,2017-08-30T20:52:25.337Z,,Virginia Institute of Marine Science
 140,NWA.DEHE1,DEHE1,Redden Road,Bridge,38.7475,-75.5816,,NAD83,Sussex County,10005,020801090402,Lower Chesapeake,Delaware,FALSE,Headwaters Nanticoke River,,TRUE,,1900-01-01T00:00:00Z,,1900-01-01T00:00:00Z,,Nanticoke Watershed Alliance
 141,NWA.DEHE2,DEHE2,Rifle Range Road,Bridge,38.7283,-75.562,,NAD83,Sussex County,10005,020801090404,Lower Chesapeake,Delaware,FALSE,Clear Brook-Nanticoke River,,TRUE,,1900-01-01T00:00:00Z,,1900-01-01T00:00:00Z,,Nanticoke Watershed Alliance

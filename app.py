@@ -1,34 +1,86 @@
 import dash
+import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import plotly.graph_objs as go
 import us
+import numpy as np
 
 mapbox_access_token = "pk.eyJ1IjoicHJpeWF0aGFyc2FuIiwiYSI6ImNqbGRyMGQ5YTBhcmkzcXF6YWZldnVvZXoifQ.sN7gyyHTIq1BSfHQRBZdHA"
 
-water_quality_samples = pd.read_csv("data/cmcWaterQualitySamples.csv")
-station_identifier_columns = [
-    "StationName",
-    "StationCode",
-    "Latitude",
-    "Longitude",
-    "GroupName"
-]
-all_stations = water_quality_samples[station_identifier_columns].drop_duplicates()
+# Data on individual stations.
+cmc_stations = pd.read_csv("data/cmcStations.csv")
+cmc_stations = cmc_stations[cmc_stations.Status]
 
-app = dash.Dash(__name__)
+# Data on all samples.
+water_quality_samples = pd.read_csv("data/cmcWaterQualitySamples.csv")
+
+# Data on whether stations have a reading for a particular parameter.
+parameters = pd.read_csv('data/cmcParameters.csv')
+shared_parameters = list(
+    set(water_quality_samples.columns) & set(parameters.Name))
+station_parameters = water_quality_samples[['StationName'] + shared_parameters].groupby(
+    'StationName'
+).agg(
+    lambda x: any(~np.isnan(x))
+)
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div([
     html.Div([
-        html.H1("Chesapeake Monitoring Collective")
+        html.H1("Chesapeake Monitoring Cooperative")
     ], style={
         "textAlign": "center",
         "padding-bottom": "10",
         "padding-top": "10"}),
     html.Div([
+        html.H2("County"),
+        dcc.Dropdown(id="county-selected",
+                     options=[{"label": group, "value": group} for group in cmc_stations["CityCounty"].dropna().unique()],
+                     value=[],
+                     multi=True,
+                     style={
+                         "display": "block",
+                         "margin-left": "auto",
+                         "margin-right": "auto",
+                         "width": "75%"
+                     }
+                     )
+    ]),
+    html.Div([
+        html.H2("Water Body"),
+        dcc.Dropdown(id="waterbody-selected",
+                     options=[{"label": group, "value": group} for group in cmc_stations["WaterBody"].dropna().unique()],
+                     value=[],
+                     multi=True,
+                     style={
+                         "display": "block",
+                         "margin-left": "auto",
+                         "margin-right": "auto",
+                         "width": "75%"
+                     }
+                     )
+    ]),
+    html.Div([
+        html.H2("Group Name"),
         dcc.Dropdown(id="group-selected",
-                     options=[{"label": group, "value": group} for group in all_stations["GroupName"].unique()],
+                     options=[{"label": group, "value": group} for group in cmc_stations["GroupName"].unique()],
+                     value=[],
+                     multi=True,
+                     style={
+                         "display": "block",
+                         "margin-left": "auto",
+                         "margin-right": "auto",
+                         "width": "75%"
+                     }
+                     )
+    ]),
+    html.Div([
+        html.H2("Parameter"),
+        dcc.Dropdown(id="parameter-selected",
+                     options=[{"label": group, "value": group} for group in shared_parameters],
                      value=[],
                      multi=True,
                      style={
@@ -45,24 +97,48 @@ app.layout = html.Div([
 
 @app.callback(
     dash.dependencies.Output("main-map", "figure"),
-    [dash.dependencies.Input("group-selected", "value")]
-
+    [
+        dash.dependencies.Input("county-selected", "value"),
+        dash.dependencies.Input("waterbody-selected", "value"),
+        dash.dependencies.Input("group-selected", "value"),
+        dash.dependencies.Input("parameter-selected", "value")
+    ]
 )
-def update_figure(selected):
+def update_figure(counties_selected, waterbodies_selected, groups_selected,
+                  parameters_selected):
     trace = []
-    if not selected:
-        filtered_stations = all_stations
-    else:
-        filtered_stations = all_stations[all_stations["GroupName"].apply(lambda x: x in selected)]
+    filtered_stations = cmc_stations
+    if counties_selected:
+        filtered_stations = cmc_stations[cmc_stations["CityCounty"].apply(lambda x: x in counties_selected)]
+    if waterbodies_selected:
+        filtered_stations = cmc_stations[cmc_stations["WaterBody"].apply(lambda x: x in waterbodies_selected)]
+    if groups_selected:
+        filtered_stations = cmc_stations[cmc_stations["GroupName"].apply(lambda x: x in groups_selected)]
+    if parameters_selected:
+        mask = station_parameters[parameters_selected].all(axis=1)
+        filtered_stations = cmc_stations[cmc_stations["Name"].apply(lambda x: x in station_parameters[mask].index)]
+
+    if filtered_stations.shape != cmc_stations.shape:
+        data_complement = cmc_stations[cmc_stations["Name"].apply(lambda x: x not in filtered_stations["Name"])]
+        trace.append(go.Scattermapbox(
+            lat=data_complement["Lat"],
+            lon=data_complement["Long"],
+            mode="markers",
+            marker={"symbol": "circle", "size": 10, "opacity": .05},
+            text=data_complement["Name"],
+            hoverinfo="text",
+            name="test"
+        ))
     trace.append(go.Scattermapbox(
-        lat=filtered_stations["Latitude"],
-        lon=filtered_stations["Longitude"],
+        lat=filtered_stations["Lat"],
+        lon=filtered_stations["Long"],
         mode="markers",
         marker={"symbol": "circle", "size": 10},
-        text=filtered_stations["StationName"],
+        text=filtered_stations["Name"],
         hoverinfo="text",
         name="test"
     ))
+
     return {
         "data": trace,
         "layout": go.Layout(
