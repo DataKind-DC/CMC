@@ -293,7 +293,12 @@ def update_figure(counties_selected, waterbodies_selected, groups_selected,
 	return {
 		'data': trace,
 		'layout': go.Layout(
-			autosize=True,
+			title=go.layout.Title(
+                text="Selected {} stations".format(filtered_stations.shape[0]),
+                xref="paper",
+                x=0
+            ),
+            autosize=True,
 			hovermode='closest',
 			showlegend=False,
 			height=700,
