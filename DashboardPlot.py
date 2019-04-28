@@ -4,15 +4,13 @@ import plotly.graph_objs as go
 import numpy as np
 
 class DashboardPlot():
-	def __init__(self, parameter):
+	def __init__(self, parameter, df):
 		self.parameter = parameter
-		df = pd.read_csv('data/cmcWaterQualitySamples.csv')
-		df['Date'] = pd.to_datetime(df.Date)
-		self.df = df.sort_values(by = 'Date')
+		self.df = df
 		# self.x = [int(datestring[4:6]) for datestring in self.startDates]
 
 	def plot(self, stationName):
-		stationdf = self.df[self.df['StationName'] == stationName]
+		stationdf = self.df[self.df['StationName'] == stationName][['Date', self.parameter]]
 		trace = [go.Scatter(
 					x = stationdf['Date'],
 					y = stationdf[self.parameter], 
