@@ -65,7 +65,6 @@ navbar = dbc.NavbarSimple(
 )
 
 body = dbc.Container([
-<<<<<<< HEAD
 	dbc.Row([
 		dbc.Col([
 			html.P('County'),
@@ -242,58 +241,6 @@ body = dbc.Container([
 			html.Div(dcc.Graph(id='water-temp'))])
 		],
 		align = 'center')
-=======
-    dbc.Row([
-        dbc.Col([
-            html.P("County"),
-            dcc.Dropdown(
-                id="county-selected",
-                options=[{"label": group, "value": group} for group in cmc_stations["CityCounty"].dropna().unique()],
-                value=[],
-                multi=True,
-                style={
-                    "display": "block"
-                }
-            ),
-            html.P("Water Body"),
-            dcc.Dropdown(
-                id="waterbody-selected",
-                options=[{"label": group, "value": group}
-                         for group in cmc_stations["WaterBody"].dropna().unique()],
-                value=[],
-                multi=True,
-                style={
-                    "display": "block"
-                }
-            ),
-            html.P("Group Name"),
-            dcc.Dropdown(
-                id="group-selected",
-                options=[{"label": group, "value": group}
-                         for group in cmc_stations["GroupName"].unique()],
-                value=[],
-                multi=True,
-                style={
-                    "display": "block"
-                }
-            ),
-            html.P("Parameter"),
-            dcc.Dropdown(
-                id="parameter-selected",
-                options=[{"label": group, "value": group}
-                         for group in list(station_parameters.columns.values) + ["Benthic"]],
-                value=[],
-                multi=True,
-                style={
-                    "display": "block"
-                }
-            )
-        ], md=3),
-        dbc.Col([
-            html.Div(dcc.Graph(id="main-map"))
-        ])
-    ])
->>>>>>> c1ea83dd3fef261122b7d3e6f37fd97fd617ead0
 ])
 
 app.layout = html.Div([navbar, body])
@@ -309,7 +256,6 @@ app.layout = html.Div([navbar, body])
 	]
 )
 def update_figure(counties_selected, waterbodies_selected, groups_selected,
-<<<<<<< HEAD
 				  parameters_selected):
 	trace = []
 	filtered_stations = cmc_stations
@@ -571,69 +517,6 @@ def update_water_temperature_plot(clickData):
 		selectedStationName = 'TC1'
 	return WaterTemperatureDashboardPlot.plot(selectedStationName)
 
-
-=======
-                  parameters_selected):
-    trace = []
-    filtered_stations = cmc_stations
-    if counties_selected:
-        filtered_stations = filtered_stations[filtered_stations["CityCounty"].apply(
-            lambda x: x in counties_selected)]
-    if waterbodies_selected:
-        filtered_stations = filtered_stations[filtered_stations["WaterBody"].apply(
-            lambda x: x in waterbodies_selected)]
-    if groups_selected:
-        filtered_stations = filtered_stations[filtered_stations["GroupName"].apply(
-            lambda x: x in groups_selected)]
-    if parameters_selected:
-        benthic = False
-        if "Benthic" in parameters_selected:
-            parameters_selected.remove("Benthic")
-            benthic = True
-        mask = None
-        if parameters_selected:
-            mask = station_parameters[parameters_selected].all(axis=1)
-        filtered_stations = filtered_stations[filtered_stations["Name"].apply(
-            lambda x: (not parameters_selected or x in station_parameters[mask].index) and
-            (not benthic or x in benthic_samples["StationName"].values))]
-
-    if filtered_stations.shape != cmc_stations.shape:
-        data_complement = cmc_stations[cmc_stations["Name"].apply(lambda x: x not in filtered_stations["Name"])]
-        trace.append(go.Scattermapbox(
-            lat=data_complement["Lat"],
-            lon=data_complement["Long"],
-            mode="markers",
-            marker={"symbol": "circle", "size": 10, "opacity": .05},
-            text=data_complement["Name"],
-            hoverinfo="text",
-            name="test"
-        ))
-    trace.append(go.Scattermapbox(
-        lat=filtered_stations["Lat"],
-        lon=filtered_stations["Long"],
-        mode="markers",
-        marker={"symbol": "circle", "size": 10},
-        text=filtered_stations["Name"],
-        hoverinfo="text",
-        name="test"
-    ))
-
-    return {
-        "data": trace,
-        "layout": go.Layout(
-            autosize=True,
-            hovermode="closest",
-            showlegend=False,
-            height=700,
-            mapbox={"accesstoken": mapbox_access_token,
-                    "bearing": 0,
-                    "center": {"lat": 38.9784, "lon": -76.4922},
-                    "zoom": 5,
-                    "style": "mapbox://styles/mapbox/light-v9"},
-        )
-
-    }
->>>>>>> c1ea83dd3fef261122b7d3e6f37fd97fd617ead0
 
 server = app.server
 
