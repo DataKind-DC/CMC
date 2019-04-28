@@ -16,6 +16,9 @@ cmc_stations = cmc_stations[cmc_stations.Status]
 # Data on all samples.
 water_quality_samples = pd.read_csv("data/cmcWaterQualitySamples.csv")
 
+# Data on Benthic samples.
+benthic_samples = pd.read_csv('data/cmcBenthicSamples.csv')
+
 # Data on whether stations have a reading for a particular parameter.
 parameters = pd.read_csv('data/cmcParameters.csv')
 shared_parameters = list(
@@ -44,49 +47,40 @@ body = dbc.Container([
                 value=[],
                 multi=True,
                 style={
-                    "display": "block",
-                    "margin-left": "auto",
-                    "margin-right": "auto",
-                    "width": "100%"
+                    "display": "block"
                 }
             ),
             html.P("Water Body"),
             dcc.Dropdown(
                 id="waterbody-selected",
-                options=[{"label": group, "value": group} for group in cmc_stations["WaterBody"].dropna().unique()],
+                options=[{"label": group, "value": group}
+                         for group in cmc_stations["WaterBody"].dropna().unique()],
                 value=[],
                 multi=True,
                 style={
-                    "display": "block",
-                    "margin-left": "auto",
-                    "margin-right": "auto",
-                    "width": "100%"
+                    "display": "block"
                 }
             ),
             html.P("Group Name"),
             dcc.Dropdown(
                 id="group-selected",
-                options=[{"label": group, "value": group} for group in cmc_stations["GroupName"].unique()],
+                options=[{"label": group, "value": group}
+                         for group in cmc_stations["GroupName"].unique()],
                 value=[],
                 multi=True,
                 style={
-                    "display": "block",
-                    "margin-left": "auto",
-                    "margin-right": "auto",
-                    "width": "100%"
+                    "display": "block"
                 }
             ),
             html.P("Parameter"),
             dcc.Dropdown(
                 id="parameter-selected",
-                options=[{"label": group, "value": group} for group in shared_parameters],
+                options=[{"label": group, "value": group}
+                         for group in list(station_parameters.columns.values) + ["Benthic"]],
                 value=[],
                 multi=True,
                 style={
-                    "display": "block",
-                    "margin-left": "auto",
-                    "margin-right": "auto",
-                    "width": "100%"
+                    "display": "block"
                 }
             )
         ], md=3),
@@ -113,14 +107,25 @@ def update_figure(counties_selected, waterbodies_selected, groups_selected,
     trace = []
     filtered_stations = cmc_stations
     if counties_selected:
-        filtered_stations = filtered_stations[filtered_stations["CityCounty"].apply(lambda x: x in counties_selected)]
+        filtered_stations = filtered_stations[filtered_stations["CityCounty"].apply(
+            lambda x: x in counties_selected)]
     if waterbodies_selected:
-        filtered_stations = filtered_stations[filtered_stations["WaterBody"].apply(lambda x: x in waterbodies_selected)]
+        filtered_stations = filtered_stations[filtered_stations["WaterBody"].apply(
+            lambda x: x in waterbodies_selected)]
     if groups_selected:
-        filtered_stations = filtered_stations[filtered_stations["GroupName"].apply(lambda x: x in groups_selected)]
+        filtered_stations = filtered_stations[filtered_stations["GroupName"].apply(
+            lambda x: x in groups_selected)]
     if parameters_selected:
-        mask = station_parameters[parameters_selected].all(axis=1)
-        filtered_stations = filtered_stations[filtered_stations["Name"].apply(lambda x: x in station_parameters[mask].index)]
+        benthic = False
+        if "Benthic" in parameters_selected:
+            parameters_selected.remove("Benthic")
+            benthic = True
+        mask = None
+        if parameters_selected:
+            mask = station_parameters[parameters_selected].all(axis=1)
+        filtered_stations = filtered_stations[filtered_stations["Name"].apply(
+            lambda x: (not parameters_selected or x in station_parameters[mask].index) and
+            (not benthic or x in benthic_samples["StationName"].values))]
 
     if filtered_stations.shape != cmc_stations.shape:
         data_complement = cmc_stations[cmc_stations["Name"].apply(lambda x: x not in filtered_stations["Name"])]
@@ -153,7 +158,7 @@ def update_figure(counties_selected, waterbodies_selected, groups_selected,
             mapbox={"accesstoken": mapbox_access_token,
                     "bearing": 0,
                     "center": {"lat": 38.9784, "lon": -76.4922},
-                    "pitch": 30, "zoom": 6,
+                    "zoom": 5,
                     "style": "mapbox://styles/mapbox/light-v9"},
         )
 
