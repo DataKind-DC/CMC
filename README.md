@@ -17,21 +17,21 @@ The current app is available at https://cmc-data-explorer.herokuapp.com/
 The interactive map is built using Plotly's Dash package and the website is currently freely deployed and hosted on Heroku. 
 
 ### Next Steps for the app
-- [ ] Data Integration
+#### Data Integration
   - [ ] Add the station (site location) API endpoint
-- [ ] Parameters for filtering data
+#### Parameters for filtering data
   - [ ] add data range selection
   - [ ] add "Benthic" as an option to show any sites with benthic macroinvertebrate data
-- [ ] Visualizations and Summary Statistics
+#### Visualizations and Summary Statistics
   - [ ] Add simple statistics about select parameters at the top of the page
   - [ ] Add units to all plot y-axes
   - [ ] Change all plots to line graphs to better see progress over time 
   - [ ] Integrate depth profiles in plots. Some parameters are collected at multiple depths at the same time and location. Chemical data points have an associated depth value. Options for integrating depth: color code points by depth or connect points at the same depth, recognizing that depth will not be the same from one sampling event to the next.
   - [ ] Add color shading or horizontal lines dividing "normal" values from extreme values. This will require threshold values for each parameter (see "Research and Analysis" section below).
   - [ ] Add a plot for Index of Benthic Indicators (IBI), which is a calculation from the benthic data.
-- [ ] Page Layout
+#### Page Layout
   - [ ] Add a header between the map and first row of plots. The header should include: name of the selected site (code and full site name, though some sites only have a code), name of the group collecting data at the site, the first and last dates of data collection
-- [ ] Research and Analysis
+#### Research and Analysis
   - [ ] Determine the appropriate threshold values to use for each parameter (dissolved oxygen: oxic, hypoxic, anoxic; for E. coli: above/below EPA swimming limit)
 
 
