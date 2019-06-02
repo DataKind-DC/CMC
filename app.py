@@ -12,19 +12,19 @@ import plotly.graph_objs as go
 
 mapbox_access_token = 'pk.eyJ1IjoicHJpeWF0aGFyc2FuIiwiYSI6ImNqbGRyMGQ5YTBhcmkzcXF6YWZldnVvZXoifQ.sN7gyyHTIq1BSfHQRBZdHA'
 
-# Data on individual stations.
+# read data on monitoring stations.
 cmc_stations = pd.read_csv('data/cmcStations.csv')
 cmc_stations = cmc_stations[cmc_stations.Status]
 
-# Data on all samples.
+# read data on all Water Quality samples.
 water_quality_samples = pd.read_csv('data/cmcWaterQualitySamples.csv')
 water_quality_samples['Date'] = pd.to_datetime(water_quality_samples.Date)
 water_quality_samples.sort_values(by='Date', inplace=True)
 
-# Data on Benthic samples.
+# read data on Benthic samples.
 benthic_samples = pd.read_csv('data/cmcBenthicSamples.csv')
 
-# Data on whether stations have a reading for a particular parameter.
+# read data on whether stations have a reading for a particular parameter.
 parameters = pd.read_csv('data/cmcParameters.csv')
 shared_parameters = list(
 	set(water_quality_samples.columns) & set(parameters.Name))
@@ -34,8 +34,11 @@ station_parameters = water_quality_samples[['StationName'] + shared_parameters].
 	lambda x: any(~np.isnan(x))
 )
 
+# initialize Dash app, including the bootstrap theme for styling the webpage
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+
+# generate all dashboard plots for parameters
 DissolvedOxygenDashboardPlot = DashboardPlot('Dissolved oxygen', water_quality_samples)
 AlkalinityDashboardPlot = DashboardPlot('Alkalinity', water_quality_samples)
 AmmoniaNitrogenDashboardPlot = DashboardPlot('Ammonia-nitrogen', water_quality_samples)
@@ -59,13 +62,14 @@ WaterClarityDashboardPlot = DashboardPlot('Water Clarity', water_quality_samples
 WaterTemperatureDashboardPlot = DashboardPlot('Water temperature', water_quality_samples)
 SalinityDashboardPlot = DashboardPlot('Salinity', water_quality_samples)
 
-
+# create navigation bar
 navbar = dbc.NavbarSimple(
 	brand='Chesapeake Monitoring Cooperative',
 	brand_href='#',
 	sticky='top',
 )
 
+# create the body of the app
 body = dbc.Container([
 	dbc.Row([
 		dbc.Col([
@@ -126,6 +130,8 @@ body = dbc.Container([
 			html.Div(dcc.Graph(id='main-map'))
 		])
 	]),
+	
+	# define the location of the parameter plots, with a certain number in each row
 	dbc.Row(
 		[
 		dbc.Col([
@@ -245,9 +251,11 @@ body = dbc.Container([
 		align = 'center')
 ])
 
+# define the layout of the page for the navigation bar and body
 app.layout = html.Div([navbar, body])
 
 
+# define the inputs that will make the app interactive and responsive
 @app.callback(
 	dash.dependencies.Output('main-map', 'figure'),
 	[
@@ -313,6 +321,7 @@ def update_figure(counties_selected, waterbodies_selected, groups_selected,
 
 	}
 
+# Define functions to update parameter plots on click
 # All of these callbacks are separate to allow for parallel computation 
 # for the pandas subsetting that occurs within the plot function.
 @app.callback(
@@ -527,5 +536,6 @@ def update_water_temperature_plot(clickData):
 
 server = app.server
 
+# run the app server when this code is run from the command line
 if __name__ == '__main__':
 	app.run_server(debug=True)
