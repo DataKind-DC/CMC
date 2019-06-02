@@ -10,7 +10,7 @@ DataKind DC (DKDC) hopes to use the data collected and standardized by CMC to he
 
 ## Project Objective
 
-At the April 2019 DKDC DataDive, participants worked with CMC partners to develop an interactive web app to allow users to explore the data collected through CMC's efforts. CMC would like the data to be more easily available for filtering and downloading. 
+April 2019: At the April DKDC DataDive, participants worked with CMC partners to develop an interactive web app to allow users to explore the data collected through CMC's efforts. CMC would like the data to be more easily available for filtering and downloading. 
 
 The current app is available at https://cmc-data-explorer.herokuapp.com/
 
