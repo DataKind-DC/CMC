@@ -5,7 +5,7 @@ import dash_html_components as html
 import pandas as pd
 import us
 import numpy as np
-from DashboardPlot import DashboardPlot
+from plots.DashboardPlot import DashboardPlot
 import json
 import plotly.graph_objs as go
 
