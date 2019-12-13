@@ -3,32 +3,22 @@
 DataKind DC (DKDC) hopes to use the data collected and standardized by CMC to help the organization better understand monitoring activities. This analysis might include identifying impactful patterns in the data which would encourage more scientists and states to use the data and understanding any gaps in data collection} so they can continue to build this useful open data resource for future scientific efforts. 
 
 ## How to get involved
-* Attend DKDC DataJams to meet the team and learn about the project
+* Attend DKDC DataJams and Project Nights to meet the team and learn about the project
 * Feel free to contribute to the GitHub repository anytime
 
-## Project Overview
-April 2019: At the April DKDC DataDive, participants worked with CMC partners to develop an interactive web app to allow users to explore the data collected through CMC's efforts. CMC would like the data to be more easily available for filtering and downloading. 
+## Current Project
 
-The current app is available at https://cmc-data-explorer.herokuapp.com/
+CMC would like to better understand how their volunteers' data collection fills in the gaps in water quality understanding. Volunteers will gather data available from various Federal and state agencies, including the US Geological Survey (USGS) and Environmental Protection Agency (EPA) and then develop visual products that highlight areas where CMC volunteers are contributing to scientific knowledge that otherwise be unavailable. 
 
-The interactive map is built using Plotly's Dash package and the website is currently freely deployed and hosted on Heroku. 
+Project steps:
 
-### Next Steps for the app
-#### Data Integration
-  - [ ] Add the station (site location) API endpoint
-#### Parameters for filtering data
-  - [ ] add data range selection
-  - [ ] add "Benthic" as an option to show any sites with benthic macroinvertebrate data
-#### Visualizations and Summary Statistics
-  - [ ] Add simple statistics about select parameters at the top of the page
-  - [ ] Add units to all plot y-axes
-  - [ ] Change all plots to line graphs to better see progress over time 
-  - [ ] Integrate depth profiles in plots. Some parameters are collected at multiple depths at the same time and location. Chemical data points have an associated depth value. Options for integrating depth: color code points by depth or connect points at the same depth, recognizing that depth will not be the same from one sampling event to the next.
-  - [ ] Add color shading or horizontal lines dividing "normal" values from extreme values. This will require threshold values for each parameter (see "Research and Analysis" section below).
-  - [ ] Add a plot for Index of Benthic Indicators (IBI), which is a calculation from the benthic data.
-#### Page Layout
-  - [ ] Add a header between the map and first row of plots. The header should include: name of the selected site (code and full site name, though some sites only have a code), name of the group collecting data at the site, the first and last dates of data collection
-#### Research and Analysis
-  - [ ] Determine the appropriate threshold values to use for each parameter (dissolved oxygen: oxic, hypoxic, anoxic; for E. coli: above/below EPA swimming limit)
+- [x] Add CMC datasets to the google drive under the 'datasets' folder
+- [] Add non-CMC datasets to the google drive under the 'datasets' folder. This might include data about data collection station information or actual data collection effort data
+- [] Visualize the data, generate statistics that communicate how CMC is contributing where gaps exist
 
+## Previous Projects
 
+DataKind has developed other visualizations and analyses to support CMC.
+
+* April 2019: At the April DKDC DataDive, participants worked with CMC partners to develop an interactive web app to allow users to explore the data collected through CMC's efforts. CMC would like the data to be more easily available for filtering and downloading. The interactive [map](https://cmc-data-explorer.herokuapp.com/) is built using Plotly's Dash package and the website is currently freely deployed and hosted on Heroku. This project is archived in [google drive](https://drive.google.com/open?id=17TwpkiUyWlIp8IOh72huhSUZYg9h_JMo): 
+* October 2019: Participants built an interactive map for users to see CMC benthic and water data collection in relation to culverts in Maryland and Virginia. The [map](https://datakind-dc.github.io/CMC/) is live and hosted by GitHub. The index file for this webpage is still in this repo to allow hosting.
