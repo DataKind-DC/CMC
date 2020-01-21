@@ -13,7 +13,7 @@ CMC would like to better understand how their volunteers' data collection fills 
 Project steps:
 
 - [x] Add CMC datasets to the google drive under the 'datasets' folder
-- [ ] Add non-CMC datasets to the google drive under the 'datasets' folder. This might include data about data collection station information or actual data collection effort data
+- [x] Add non-CMC datasets to the google drive under the 'datasets' folder. This might include data about data collection station information or actual data collection effort data
 - [ ] Visualize the data, generate statistics that communicate how CMC is contributing where gaps exist
 
 ## Previous Projects
