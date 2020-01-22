@@ -14,8 +14,22 @@ Project steps:
 
 - [x] Add CMC datasets to the google drive under the 'datasets' folder
 - [x] Add non-CMC datasets to the google drive under the 'datasets' folder. This might include data about data collection station information or actual data collection effort data
-- [ ] Subset data for the appropriate timeframe (2015-present)
-- [ ] Visualize the data, generate statistics that communicate how CMC is contributing where gaps exist
+- [ ] Produce clean CMC data
+  - [ ] Subset data for the appropriate timeframe (2014-present) - Crystal and Jenil
+  - [ ] Drop unneeded variables for each parameter - Crystal and Jenil
+  - [ ] Concatenate the parameter value and unit variables into one (i.e. combine the "5" value and "deg C" into "5 deg C") - Crystal and Jenil
+  - [ ] Transform the data from wide to long format to match the WQP data - Jake and Apoorv
+- [ ] Produce clean Water Quality Portal (WQP) Data - Rob, Kyle, Arjit
+  - [ ] Match the Physical/Chemical Data with the Station Data, key variable is "monitoring location identifier"
+  - [ ] Subset the station data to only include stations from 2014-present
+  - [ ] Subset data for the appropriate timeframe (2014-present)
+- [ ] Align CMC and WQP data with formatting needs for visualization
+- [ ] Create interactive map - Amy D.
+  - [ ] Create basic javascript frontend (decided on Jan 21 to use Vue.js)
+  - [ ] Add dropdown menus to allow for data filtering by location, parameter type
+  - [ ] Add the clean data
+  - [ ] Host the web app on a free service (i.e. Heroku, AWS Free Tier)
+- [ ] Generate statistics that identify areas where CMC provides data where Federal/State agencies do not
 
 ## Previous Projects
 
