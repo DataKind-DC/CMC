@@ -14,6 +14,7 @@ Project steps:
 
 - [x] Add CMC datasets to the google drive under the 'datasets' folder
 - [x] Add non-CMC datasets to the google drive under the 'datasets' folder. This might include data about data collection station information or actual data collection effort data
+- [ ] Subset data for the appropriate timeframe (2015-present)
 - [ ] Visualize the data, generate statistics that communicate how CMC is contributing where gaps exist
 
 ## Previous Projects
