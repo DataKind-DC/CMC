@@ -12,7 +12,7 @@ CMC would like to better understand how their volunteers' data collection fills 
 Volunteers will use data available from various Federal and state agencies, including the US Geological Survey (USGS) and Environmental Protection Agency (EPA), to develop visual products that highlight areas where CMC volunteers are contributing to scientific knowledge that otherwise would be unavailable. 
 
 We are building an interactive web application that allows CMC and its partners to explore the data citizen scientists collect. 
-The web application is currently hosted on (Heroku)[https://cmcwebapp.herokuapp.com/].
+The web application is currently hosted on [Heroku](https://cmcwebapp.herokuapp.com/).
 
 Project steps:
 
