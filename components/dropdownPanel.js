@@ -5,7 +5,7 @@ import Head from 'next/head'
 import cmcdata from "../public/cmcdata_subset.json"
 import Dropdowns from "../components/dropdowns"
 import DatePicker from "react-datepicker";
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Input, Label } from 'reactstrap';
 
 class dropDownPanel extends PureComponent {
 
@@ -30,6 +30,12 @@ class dropDownPanel extends PureComponent {
                                   onFocusChange={focusedInput => this.setState({ focusedInput })} // PropTypes.func.isRequired,
                             />
                         </Row>
+                                <Label for="checkbox2" sm={2}>Checkbox</Label>
+        <Col sm={{ size: 10 }}>
+                        <Label check>
+                          <Input type="checkbox" id="checkbox2" />{' '}
+                            Show WQP Data
+                        </Label>
                     </Col>
         );
     }

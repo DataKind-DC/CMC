@@ -2,7 +2,6 @@ import React, { Component , PureComponent } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import cmcdata from "../public/cmcdata_subset.json"
 import Dropdowns from "../components/dropdowns"
 import DatePicker from "react-datepicker";
 import { Container, Row, Col } from 'reactstrap';
@@ -12,9 +11,15 @@ import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'rea
 import moment from "moment";
 import 'moment-timezone';
 
+import cmcdata from "../public/cmcdata_subset.json"
+import wqpdata from "../public/wqp_stations.json"
+
+
 class Home extends PureComponent {
     state = {
         filtered_data: [],
+        wqp_station_data: [],
+        show_wqp: true,
         chart_data: [],
         GroupNames: null,
         variables: null,
@@ -165,7 +170,8 @@ class Home extends PureComponent {
         this.setState({
             filtered_data: cmcdata,
             GroupNames: this.getUnique('GroupName', cmcdata),
-            variables: this.getUnique('variable', cmcdata)
+            variables: this.getUnique('variable', cmcdata),
+            wqp_station_data : wqpdata
         })
     }
 
@@ -177,7 +183,14 @@ class Home extends PureComponent {
             <Head></Head>
             <Row>
             <Col xs={10} style = {{position: 'fixed'}}>
-                    <this.Map style = {{ height: '700px', width: '100%', zIndex: 1}}  data = {this.state.filtered_data} selected = {this.state.selected} callBack = {this.changeLocation} />
+                    <this.Map
+                        style = {{ height: '700px', width: '100%', zIndex: 1}}
+                        data = {this.state.filtered_data}
+                        wqpdata = {this.state.wqp_station_data}
+                        show_wqp = {this.state.show_wqp}
+                        selected = {this.state.selected}
+                        callBack = {this.changeLocation}
+                    />
             </Col>
             <Col style = {{zIndex: 1001, position: 'relative', height: '400px', opacity: 1, margin: '10px'}} xs={4}>
                 <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', borderRadius: '25px', padding: '20px', margin: '5px'}}>

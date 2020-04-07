@@ -1,0 +1,24 @@
+{
+  "../components/map": [
+    {
+      "id": "./components/map.js",
+      "name": "./components/map.js",
+      "file": "static/chunks/1.js",
+      "publicPath": "static/chunks/1.js"
+    },
+    {
+      "id": "./components/pin.js",
+      "name": "./components/pin.js",
+      "file": "static/chunks/1.js",
+      "publicPath": "static/chunks/1.js"
+    }
+  ],
+  "./dev/noop": [
+    {
+      "id": "./node_modules/next/dist/client/dev/noop.js",
+      "name": "./node_modules/next/dist/client/dev/noop.js",
+      "file": "static/chunks/0.js",
+      "publicPath": "static/chunks/0.js"
+    }
+  ]
+}
