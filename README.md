@@ -14,6 +14,16 @@ Volunteers will use data available from various Federal and state agencies, incl
 We are building an interactive web application that allows CMC and its partners to explore the data citizen scientists collect. 
 The web application is currently hosted on [Heroku](https://cmcwebapp.herokuapp.com/).
 
+### Getting Started 
+
+run the following snippet to clone the repo, install all npm dependencies, and start the app in development mode.
+
+```
+git clone https://github.com/DataKind-DC/CMC.git
+npm install 
+npm run dev
+```
+
 Project steps:
 
 - [x] Add CMC datasets to the google drive under the 'datasets' folder
