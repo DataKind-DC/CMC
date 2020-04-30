@@ -24,28 +24,7 @@ npm install
 npm run dev
 ```
 
-Project steps:
-
-- [x] Add CMC datasets to the google drive under the 'datasets' folder
-- [x] Add non-CMC datasets to the google drive under the 'datasets' folder. This might include data about data collection station information or actual data collection effort data
-- [x] Produce clean CMC data
-  - [x] Subset data for the appropriate timeframe (2014-present) - Crystal and Jenil
-  - [x] Drop unneeded variables for each parameter - Crystal and Jenil
-  - [x] Concatenate the parameter value and unit variables into one (i.e. combine the "5" value and "deg C" into "5 deg C") - Crystal and Jenil
-  - [x] Transform the data from wide to long format to match the WQP data - Jake and Apoorv
-- [ ] Produce clean Water Quality Portal (WQP) Data - Rob, Kyle, Arjit
-  - [ ] Match the Physical/Chemical Data with the Station Data, key variable is "monitoring location identifier"
-  - [ ] Subset the station data to only include stations from 2014-present
-  - [ ] Subset data for the appropriate timeframe (2014-present)
-- [ ] Align CMC and WQP data with formatting needs for visualization
-- [ ] Create interactive map
-  - [x] Create basic javascript frontend
-  - [x] Add dropdown menus to allow for data filtering by location, parameter type
-  - [x] Add the clean cmc data
-  - [ ] Add the clean non-cmc data
-  - [x] Host the web app on a free service (i.e. Heroku, AWS Free Tier)
-  - [ ] Scale up to show all data points
-- [ ] Generate statistics that identify areas where CMC provides data where Federal/State agencies do not
+We are tracking bugs that need to be fixed and new features using the GitHub issues feature.
 
 ## Previous Projects
 
