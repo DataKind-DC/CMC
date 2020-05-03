@@ -10,22 +10,29 @@ import 'react-dates/initialize';
 import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'react-dates';
 import moment from "moment";
 import 'moment-timezone';
+import axios from "axios";
 
-import cmcdata from "../public/cmcdata_subset.json"
+import StationSummary from '../components/stationSummaryPanel'
+
+///import cmcdata from "../public/cmcdata_subset.json"
 import wqpdata from "../public/wqp_stations.json"
 
 
 class Home extends PureComponent {
     state = {
-        filtered_data: [],
         wqp_station_data: [],
+        all_stations_data: [],
+        stations_data: [],
+        station_ids: [],
+        group_names: [],
+        parameter_data: [],
         show_wqp: true,
         chart_data: [],
         GroupNames: null,
         variables: null,
-        selectedGroupNames: null,
-        selectedVariables: null,
-        selected: {index: null, StationName: null}, /// individual row selected
+        selectedGroupNames: [],
+        selectedVariables: [],
+        selected: [], /// individual row selected
         startDate: moment().subtract(2, "year"),
         endDate: moment(),
         availableVariablesAtLocation: null,
@@ -33,14 +40,16 @@ class Home extends PureComponent {
         };
 
 
-    Map = dynamic(() => import('../components/map'), {ssr: false});
+    MarkerMap = dynamic(() => import('../components/map'), {ssr: false});
 
     changeLocation = (e) => {
-        console.log(e.index)
+        console.log(e.Id)
         this.setState({
-            selected : cmcdata.filter((item)=> item['index'] == e.index)[0]
+            selected : this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
         }, () => {
-            this.updateChartData()
+            console.log('new')
+            this.get_station_data()
+          ///  this.updateChartData()
         })
     }
 
@@ -62,18 +71,20 @@ class Home extends PureComponent {
 
     setGroupName = (e) => {
         console.log(e)
+
         this.setState({
-            selectedGroupNames: e[0].GroupName
+            selectedGroupNames: e.length !== 0 ? e[0].variable : null
         }, () => {
-        this.setFilteredData()
+        this.update_stations()
         })
     }
 
     setVariable = (e) => {
+        console.log(e)
         this.setState({
-            selectedVariables: e[0].variable
+            selectedVariables: e.length !== 0 ? e[0].variable : null
         }, () => {
-        this.setFilteredData()
+        this.update_stations()
         })
     }
 
@@ -91,9 +102,9 @@ class Home extends PureComponent {
             selected: {index: null, StationName: null},
             chart_data: null,
             selectedVariableAtLocation: null
-
             })
      }
+
 
      setVariableAtLocation = (e) => {
         console.log(e)
@@ -102,40 +113,6 @@ class Home extends PureComponent {
         }, () => {
         this.updateChartData()
         })
-    }
-
-
-    filterData = () => {
-        const new_data = (this.state.selectedGroupNames)
-                            ? cmcdata.filter((item) => item['GroupName'] == this.state.selectedGroupNames)
-                            : cmcdata
-        const filtered_data = (this.state.selectedVariables)
-                            ? new_data.filter((item) => item['variable'] == this.state.selectedVariables)
-                            : new_data
-        const final_data = (this.state.startDate)
-                            ? filtered_data.filter(a => new Date(a.Date) - this.state.startDate > 0)
-                            : filtered_data
-        const ultimate_data = (this.state.endDate)
-                            ? final_data.filter(a => new Date(a.Date) - this.state.endDate < 0)
-                            : final_data
-
-        return ultimate_data
-    }
-
-
-    setFilteredData = () => {
-        this.resetLocation()
-        const new_data = this.filterData()
-        this.setState({
-                filtered_data : new_data
-            })
-    }
-
-
-    formatVals = (item, objs) => {
-        const a = item.Date
-        const b = parseFloat(item.value)
-        objs[a] = b
     }
 
     updateChartData = () => {
@@ -164,28 +141,103 @@ class Home extends PureComponent {
         })
     }
 
+    load_station_data = () => {
+        axios.get('https://cmc.vims.edu/odata/Stations')
+            .then(res => {
+                const data = res.data['value'];
+
+                this.setState({
+                    all_stations_data: data,
+                    stations_data: data,
+                })
+
+            })
+    }
+
+    load_parameter_data = () => {
+        axios.get('https://cmc.vims.edu/odata/Groups?$expand=CmcMemberUser,CmcMemberUser2,CmcMemberUser3,ParameterGroups($select=Parameter,LabId,DetectionLimit;$expand=Parameter)&$orderby=Name')
+            .then(res => {
+                const data = res.data['value'];
+               ///const parameter_data = data.map((item) => {(item.ParameterGroups)})
+                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name) })
+                const parameter_array = parameter_types.flat()
+                const unique_parameters = parameter_array.filter((x, i, a) => a.indexOf(x) === i)
+                const unique_parameters_dropdown = unique_parameters.map((item) => { return {'variable' : item}})
+
+                const group_names = data.map((item) => { return {'label' : item.Name, 'variable': item.Code}})
+
+
+                this.setState({
+                    parameter_data: data,
+                    variables: unique_parameters_dropdown,
+                    group_names: group_names
+                })
+
+            })
+    }
+
+
+    get_station_data = () => {
+        const station_id = this.state.selected.Id
+        const get_payload = {
+            '?$expand': ['Event($expand=Station,Group),Parameter'],
+            '$filter': [`Event/StationId eq ${station_id} and QaFlagId eq 2`]
+            }
+
+        axios.get('https://cmc.vims.edu/odata/PublicSamples', {params : get_payload})
+            .then(res => {        this.get_station_data();
+                console.log(res.data)
+            })
+
+
+    }
+
+
+    update_stations = () => {
+    ///    const param_data = this.state.parameter_data;
+///
+    ///    /// parameters with a certain code for a station
+    ///    const subset_param_data = (this.state.selectedVariables === null)
+    ///                        ? param_data
+    ///                        : param_data.filter((item) => item['ParameterGroups'].some((subitem) => subitem['Parameter']['Name'] == this.state.selectedVariables))
+///
+        const subset_stations_by_group_name = (this.state.selectedGroupNames === null)
+                                                    ? this.state.all_stations_data
+                                                    : this.state.all_stations_data.filter(item => item['Code'].startsWith(this.state.selectedGroupNames))
+
+
+        /// stations supplying data with those parameters (for filtering stations)
+       /// const new_stations_data = subset_param_data.map((item) => { return item['Id'] })
+       /// console.log(new_stations_data)
+///
+       /// const final_data = subset_stations_by_group_name.filter((item) => new_stations_data.includes(item['Id']))
+       /// console.log(final_data)
+
+        this.setState({ stations_data : subset_stations_by_group_name })
+
+    }
 
 
     componentDidMount = () => {
+        this.load_station_data();
+        this.load_parameter_data();
+
         this.setState({
-            filtered_data: cmcdata,
-            GroupNames: this.getUnique('GroupName', cmcdata),
-            variables: this.getUnique('variable', cmcdata),
             wqp_station_data : wqpdata
         })
     }
 
     render() {
-        const selected = this.state.selected
-        console.log(selected)
+
         return (
         <Container>
             <Head></Head>
             <Row>
             <Col xs={10} style = {{position: 'fixed'}}>
-                    <this.Map
+                    <this.MarkerMap
                         style = {{ height: '700px', width: '100%', zIndex: 1}}
-                        data = {this.state.filtered_data}
+                        stations_data={this.state.stations_data}
+                       /* data = {this.state.filtered_data} */
                         wqpdata = {this.state.wqp_station_data}
                         show_wqp = {this.state.show_wqp}
                         selected = {this.state.selected}
@@ -199,37 +251,34 @@ class Home extends PureComponent {
                             <b> Filter the stations on the map by group name, parameter, or date collected. </b>
                         </Row>
                         <Row style={{padding: '5px'}} className="justify-content-md-center">
-                            <Dropdowns placeholder={"Select a local group..."} options={this.state.GroupNames} label = {'GroupName'} callBack={this.setGroupName} />
+                            <Dropdowns
+                                placeholder={"Select a local group..."}
+                                options={this.state.group_names}
+                                label = {'label'}
+                                callBack={this.setGroupName} />
                         </Row>
                         <Row style={{padding: '5px'}} className="justify-content-md-center">
-                            <Dropdowns placeholder={"Select a parameter..."} options={this.state.variables} label = {'variable'} callBack={this.setVariable} />
+                            <Dropdowns
+                                placeholder={"Select a parameter..."}
+                                options={this.state.variables}
+                                label = {'variable'}
+                                callBack={this.setVariable} />
                         </Row>
                         <Row style={{paddingtop: '10px'}} className="justify-content-md-center">
                             <DateRangePicker
-                                  startDate={this.state.startDate} // momentPropTypes.momentObj or null,
-                                  startDateId="your_unique_start_date_id" // PropTypes.string.isRequired,
-                                  endDate={this.state.endDate} // momentPropTypes.momentObj or null,
-                                  endDateId="your_unique_end_date_id" // PropTypes.string.isRequired,
-                                  onDatesChange={({ startDate, endDate }) => this.setDates(startDate, endDate)} // PropTypes.func.isRequired,
-                                  focusedInput={this.state.focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
-                                  onFocusChange={focusedInput => this.setState({ focusedInput })} // PropTypes.func.isRequired,
+                                  startDate={this.state.startDate}
+                                  startDateId="your_unique_start_date_id"
+                                  endDate={this.state.endDate}
+                                  endDateId="your_unique_end_date_id"
+                                  onDatesChange={({ startDate, endDate }) => this.setDates(startDate, endDate)}
+                                  focusedInput={this.state.focusedInput}
+                                  onFocusChange={focusedInput => this.setState({ focusedInput })}
                             />
                         </Row>
                     </Col>
                 </Row>
                  <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', borderRadius: '25px', padding: '10px'}}>
-                    <Col>
-                        { selected.StationName !== null
-                        ? <b> Selected station: {selected.StationName} </b>
-                        : <b> Click a station on the map and select an available parameter to see data. </b>
-                        }
-                        <Dropdowns placeholder={"available parameters..."}
-                            options={this.state.availableVariablesAtLocation}
-                            label = {'variable'}
-                            callBack={this.setVariableAtLocation}
-                            />
-                        <Chart data = {this.state.chart_data} unit= {this.state.selected.unit} />
-                    </Col>
+                 <StationSummary station = {this.state.selected} />
                  </Row>
             </Col>
          </Row>

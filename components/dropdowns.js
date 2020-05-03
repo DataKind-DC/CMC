@@ -10,7 +10,15 @@ class Dropdowns extends PureComponent {
 
         return (
             <div style = {this.props.style} >
-                <Select clearable={true} searchable={true} placeholder={this.props.placeholder} options={this.props.options} labelField={this.props.label} value = {this.props.label} dropdownHeight="500px" onChange={this.props.callBack} />
+                <Select
+                    clearable={true}
+                    searchable={true}
+                    placeholder={this.props.placeholder}
+                    options={this.props.options}
+                    labelField={this.props.label}
+                    value = {this.props.label}
+                    dropdownHeight="500px"
+                    onChange={this.props.callBack} />
             </div>
         );
     }

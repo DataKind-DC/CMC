@@ -8,13 +8,13 @@ function Markers(props) {
 
    const {data} = props;
    return data.map(
-     city =>
-       <Marker key = {city.index} longitude={city.Longitude} latitude={city.Latitude} >
+     marker =>
+       <Marker key = {marker.Id} longitude={marker.Long} latitude={marker.Lat} >
            <CityPin
-               size = { (props.selected === city.index) ? 40 : 15}
-               fill= { (props.selected === city.index) ? '#397FC4' : '#FF9E01'}
-               opacity= { (props.selected === city.index) ? 1 : 0.8}
-               onClick={() => props.callBack(city)}
+               size = { (props.selected === marker.Id) ? 40 : 15}
+               fill= { (props.selected === marker.Id) ? '#397FC4' : '#FF9E01'}
+               opacity= { (props.selected === marker.Id) ? 1 : 0.8}
+               onClick={() => props.callBack(marker)}
                />
        </Marker>
    )
@@ -24,8 +24,8 @@ function WqpMarkers(props) {
     const {data} = props
 
     return data.map(
-      city =>
-        <Marker key = {city.index} longitude={city.Longitude} latitude={city.Latitude} >
+      marker =>
+        <Marker key = {marker.index} longitude={marker.Longitude} latitude={marker.Latitude} >
             <CityPin
                 size = {7}
                 fill= '#FF0000'
@@ -58,7 +58,7 @@ function Map(props) {
                         ? <WqpMarkers data={props.wqpdata} />
                         : <div></div>
                         }
-                    <Markers data={props.data} selected={props.selected.index} callBack={props.callBack} />
+                    <Markers data={props.stations_data} selected={props.selected.Id} callBack={props.callBack} />
 
                 </ReactMapGL>
             </Row>
