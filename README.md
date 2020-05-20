@@ -24,6 +24,8 @@ npm install
 npm run dev
 ```
 
+You will also need to install a browser plug-in to enable cross-origin resource sharing (CORS). This will allow your browser to communicate with the CMC database API. On Chrome, you can use [this plugin](https://mybrowseraddon.com/access-control-allow-origin.html). 
+
 We are tracking bugs that need to be fixed and new features using the GitHub issues feature.
 
 ## Previous Projects
