@@ -20,6 +20,7 @@ run the following snippet to clone the repo, install all npm dependencies, and s
 
 ```
 git clone https://github.com/DataKind-DC/CMC.git
+cd CMC
 npm install 
 npm run dev
 ```
