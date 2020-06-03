@@ -11,6 +11,7 @@ import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'rea
 import moment from "moment";
 import 'moment-timezone';
 import axios from "axios";
+import Toggle from 'react-toggle';
 
 import StationSummary from '../components/stationSummaryPanel'
 
@@ -273,6 +274,15 @@ class Home extends PureComponent {
                                   focusedInput={this.state.focusedInput}
                                   onFocusChange={focusedInput => this.setState({ focusedInput })}
                             />
+                        </Row>
+                        <Row style={{padding: '10px'}} className="justify-content-md-center">
+                            <Toggle
+                              id='toggle_wqp_layer'
+                              defaultChecked={this.state.show_wqp}
+                              icons={false}
+                              onClick={() => this.setState({show_wqp: !this.state.show_wqp})}
+                            />
+                            <label htmlFor='toggle_wqp_layer'>Display WQP stations</label>
                         </Row>
                     </Col>
                 </Row>

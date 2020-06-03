@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-daterangepicker/daterangepicker.css'
 import 'react-dates/lib/css/_datepicker.css';
+import "react-toggle/style.css" 
 
 export default function MyApp({ Component, pageProps }) {
   return <Component {...pageProps} />
