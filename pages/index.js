@@ -14,7 +14,6 @@ import axios from "axios";
 
 import StationSummary from '../components/stationSummaryPanel'
 
-///import cmcdata from "../public/cmcdata_subset.json"
 import wqpdata from "../public/wqp_stations.json"
 
 
