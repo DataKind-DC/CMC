@@ -7,13 +7,13 @@ import DatePicker from "react-datepicker";
 import { Container, Row, Col } from 'reactstrap';
 import Chart from "../components/dataChart"
 import 'react-dates/initialize';
-import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'react-dates';
 import moment from "moment";
 import 'moment-timezone';
 import axios from "axios";
-import Toggle from 'react-toggle';
 
 import StationSummary from '../components/stationSummaryPanel'
+import NavBar from '../components/navBar'
+import SideBar from '../components/sideBar'
 
 import wqpdata from "../public/wqp_stations.json"
 
@@ -232,10 +232,25 @@ class Home extends PureComponent {
         return (
         <Container>
             <Head></Head>
+            <NavBar />
             <Row>
-            <Col xs={10} style = {{position: 'fixed'}}>
+            <Col style = {{width: '20%'}}>
+                    <SideBar
+                        group_names={this.state.group_names}
+                        set_group_name={this.setGroupName}
+                        variables={this.state.variables}
+                        set_variable={this.setVariable}
+                        start_date={this.state.startDate}
+                        end_date={this.state.endDate}
+                        set_dates={({ startDate, endDate }) => this.setDates(startDate, endDate)}
+                        wqp_status={this.state.show_wqp}
+                        toggle_wqp={() => this.setState({show_wqp: !this.state.show_wqp})}
+                    />
+            </Col>
+            <Col>
+                <Row style={{height: '80%'}}>
                     <this.MarkerMap
-                        style = {{ height: '700px', width: '100%', zIndex: 1}}
+                        style = {{ width: '100%'}}
                         stations_data={this.state.stations_data}
                        /* data = {this.state.filtered_data} */
                         wqpdata = {this.state.wqp_station_data}
@@ -243,51 +258,14 @@ class Home extends PureComponent {
                         selected = {this.state.selected}
                         callBack = {this.changeLocation}
                     />
-            </Col>
-            <Col style = {{zIndex: 1001, position: 'relative', height: '400px', opacity: 1, margin: '10px'}} xs={4}>
-                <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', borderRadius: '25px', padding: '20px', margin: '5px'}}>
-                    <Col style = {{width: '500px'}} >
-                        <Row>
-                            <b> Filter the stations on the map by group name, parameter, or date collected. </b>
-                        </Row>
-                        <Row style={{padding: '5px'}} className="justify-content-md-center">
-                            <Dropdowns
-                                placeholder={"Select a local group..."}
-                                options={this.state.group_names}
-                                label = {'label'}
-                                callBack={this.setGroupName} />
-                        </Row>
-                        <Row style={{padding: '5px'}} className="justify-content-md-center">
-                            <Dropdowns
-                                placeholder={"Select a parameter..."}
-                                options={this.state.variables}
-                                label = {'variable'}
-                                callBack={this.setVariable} />
-                        </Row>
-                        <Row style={{paddingtop: '10px'}} className="justify-content-md-center">
-                            <DateRangePicker
-                                  startDate={this.state.startDate}
-                                  startDateId="your_unique_start_date_id"
-                                  endDate={this.state.endDate}
-                                  endDateId="your_unique_end_date_id"
-                                  onDatesChange={({ startDate, endDate }) => this.setDates(startDate, endDate)}
-                                  focusedInput={this.state.focusedInput}
-                                  onFocusChange={focusedInput => this.setState({ focusedInput })}
-                            />
-                        </Row>
-                        <Row style={{padding: '10px'}} className="justify-content-md-center">
-                            <Toggle
-                              id='toggle_wqp_layer'
-                              defaultChecked={this.state.show_wqp}
-                              icons={false}
-                              onClick={() => this.setState({show_wqp: !this.state.show_wqp})}
-                            />
-                            <label htmlFor='toggle_wqp_layer'>Display WQP stations</label>
-                        </Row>
-                    </Col>
                 </Row>
-                 <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', borderRadius: '25px', padding: '10px'}}>
-                 <StationSummary station = {this.state.selected} />
+                <Row style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white'}}>
+                    <StationSummary station = {this.state.selected} />
+                </Row>
+            </Col>
+            <Col style = {{ height: '100%' }}>
+                 <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white'}}>
+                    <StationSummary station = {this.state.selected} />
                  </Row>
             </Col>
          </Row>
