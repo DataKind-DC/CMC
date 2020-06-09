@@ -11,9 +11,9 @@ import moment from "moment";
 import 'moment-timezone';
 import axios from "axios";
 
-import StationSummary from '../components/stationSummaryPanel'
 import NavBar from '../components/navBar'
 import SideBar from '../components/sideBar'
+import ResultBar from '../components/resultBar'
 
 import wqpdata from "../public/wqp_stations.json"
 
@@ -234,7 +234,7 @@ class Home extends PureComponent {
             <Head></Head>
             <NavBar />
             <Row>
-            <Col style = {{width: '20%'}}>
+            <Col style = {{height: '100vh'}}>
                     <SideBar
                         group_names={this.state.group_names}
                         set_group_name={this.setGroupName}
@@ -247,26 +247,20 @@ class Home extends PureComponent {
                         toggle_wqp={() => this.setState({show_wqp: !this.state.show_wqp})}
                     />
             </Col>
-            <Col>
-                <Row style={{height: '80%'}}>
+            <Col xs={6}>
+                <Row style={{height: '70%'}}>
                     <this.MarkerMap
                         style = {{ width: '100%'}}
                         stations_data={this.state.stations_data}
-                       /* data = {this.state.filtered_data} */
                         wqpdata = {this.state.wqp_station_data}
                         show_wqp = {this.state.show_wqp}
                         selected = {this.state.selected}
                         callBack = {this.changeLocation}
                     />
                 </Row>
-                <Row style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white'}}>
-                    <StationSummary station = {this.state.selected} />
-                </Row>
             </Col>
-            <Col style = {{ height: '100%' }}>
-                 <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white'}}>
-                    <StationSummary station = {this.state.selected} />
-                 </Row>
+            <Col style = {{height: '100vh'}}>
+                 <ResultBar selected={this.state.selected}/>
             </Col>
          </Row>
          </Container>

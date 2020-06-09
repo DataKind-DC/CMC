@@ -13,7 +13,7 @@ import Toggle from 'react-toggle';
 
 const SideBar = (props) => {
         return (
-            <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', margin: '10px', height: '100%'}}>
+            <Row style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', height: '100%'}}>
                 <Col>
                         <Row>
                             <b> Filter the stations on the map by group name, parameter, or date collected. </b>

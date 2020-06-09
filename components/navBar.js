@@ -22,7 +22,7 @@ const NavBar = (props) => {
 
   return (
     <div>
-      <Navbar color="light" light expand="md">
+      <Navbar style={{width: '100%'}} color="light" light expand="md">
         <NavbarBrand href="/">CMC Data Explorer</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
