@@ -2,7 +2,6 @@ import React, { Component , PureComponent } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import cmcdata from "../public/cmcdata_subset.json"
 import Dropdowns from "../components/dropdowns"
 import DatePicker from "react-datepicker";
 import { Container, Row, Col, Input, Label } from 'reactstrap';

@@ -14,6 +14,7 @@ import axios from "axios";
 import NavBar from '../components/navBar'
 import SideBar from '../components/sideBar'
 import ResultBar from '../components/resultBar'
+import StatBar from '../components/statBar'
 
 import wqpdata from "../public/wqp_stations.json"
 
@@ -31,58 +32,81 @@ class Home extends PureComponent {
         GroupNames: null,
         variables: null,
         selectedGroupNames: [],
+        selectedGroupLabels: [],
         selectedVariables: [],
-        selected: [], /// individual row selected
+        selected: [],
         startDate: moment().subtract(2, "year"),
         endDate: moment(),
         availableVariablesAtLocation: null,
-        selectedVariableAtLocation: null
+        selectedVariableAtLocation: null,
+        summary_data: {}
         };
 
 
     MarkerMap = dynamic(() => import('../components/map'), {ssr: false});
 
-    changeLocation = (e) => {
-        console.log(e.Id)
-        this.setState({
-            selected : this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
-        }, () => {
-            console.log('new')
-            this.get_station_data()
-          ///  this.updateChartData()
-        })
+    get_summary = () => {
+        const res = axios.get('https://cmc.vims.edu/odata/GetHomeStats')
+            .then(res => {
+                    this.setState({summary_data: res.data[0]})
+    })
     }
 
-
-    getUnique = (e, d) => {
-        const result = [];
-        const map = new Map();
-        for (const item of d) {
-            if(!map.has(item[e])){
-                map.set(item[e], true);    // set any value to Map
-                var obj = {};
-                obj[e] = item[e];
-                result.push(obj);
-            }
-        }
-        return result
-
-    }
-
+///    getUnique = (e, d) => {
+///        const result = [];
+///        const map = new Map();
+///        for (const item of d) {
+///            if(!map.has(item[e])){
+///                map.set(item[e], true);    // set any value to Map
+///                var obj = {};
+///                obj[e] = item[e];
+///                result.push(obj);
+///            }
+///        }
+///        return result
+///
+///    }
+///
+///    updateChartData = () => {
+///        const chart_data_by_group = (this.state.selected.StationName)
+///            ? cmcdata.filter((item) => item['StationName'] == this.state.selected.StationName)
+///            : cmcdata
+///
+///        const newVariables = this.getUnique('variable', chart_data_by_group)
+///
+///        this.setState({
+///            availableVariablesAtLocation: newVariables
+///        }, () => {
+///        const new_chart_data = (this.state.selectedVariableAtLocation)
+///            ? chart_data_by_group.filter((item) => item['variable'] == this.state.selectedVariableAtLocation)
+///            : chart_data_by_group.filter((item) => item['variable'] == this.state.availableVariablesAtLocation[0])
+///
+///        const chart_data = {}
+///        new_chart_data.map((item) => {this.formatVals(item, chart_data)})
+///
+///            this.setState({
+///                chart_data: chart_data,
+///        })
+///
+///        })
+///    }
+///
     setGroupName = (e) => {
         console.log(e)
-
+        const { selectedGroupNames, selectedGroupLabels } = this.state;
         this.setState({
-            selectedGroupNames: e.length !== 0 ? e[0].variable : null
+            selectedGroupNames: e.map(item => item['value'] ),
+            selectedGroupLabels: e.map(item => item.label)
         }, () => {
-        this.update_stations()
+            console.log(this.state.selectedGroupNames)
+            this.update_stations()
         })
     }
 
     setVariable = (e) => {
         console.log(e)
-        this.setState({
-            selectedVariables: e.length !== 0 ? e[0].variable : null
+       this.setState({
+            selectedVariables: e.length !== 0 ? e.map(item => item.variable) : []
         }, () => {
         this.update_stations()
         })
@@ -107,7 +131,6 @@ class Home extends PureComponent {
 
 
      setVariableAtLocation = (e) => {
-        console.log(e)
         this.setState({
             selectedVariableAtLocation: e[0].variable
         }, () => {
@@ -115,37 +138,10 @@ class Home extends PureComponent {
         })
     }
 
-    updateChartData = () => {
-        console.log(this.state.selected.GroupName)
-
-        const chart_data_by_group = (this.state.selected.StationName)
-            ? cmcdata.filter((item) => item['StationName'] == this.state.selected.StationName)
-            : cmcdata
-
-        const newVariables = this.getUnique('variable', chart_data_by_group)
-
-        this.setState({
-            availableVariablesAtLocation: newVariables
-        }, () => {
-        const new_chart_data = (this.state.selectedVariableAtLocation)
-            ? chart_data_by_group.filter((item) => item['variable'] == this.state.selectedVariableAtLocation)
-            : chart_data_by_group.filter((item) => item['variable'] == this.state.availableVariablesAtLocation[0])
-
-        const chart_data = {}
-        new_chart_data.map((item) => {this.formatVals(item, chart_data)})
-
-            this.setState({
-                chart_data: chart_data,
-        })
-
-        })
-    }
-
-    load_station_data = () => {
-        axios.get('https://cmc.vims.edu/odata/Stations')
+    load_all_station_data = () => {
+        axios.get('https://cmc.vims.edu/odata/Stations?$select=Id,Code,Name,NameLong,Lat,Long,CityCounty,Fips,State,WaterBody,CreatedDate,ModifiedDate')
             .then(res => {
-                const data = res.data['value'];
-
+                const data = res.data['value']
                 this.setState({
                     all_stations_data: data,
                     stations_data: data,
@@ -154,23 +150,31 @@ class Home extends PureComponent {
             })
     }
 
+    load_groups_data = () => {
+        axios.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name&$orderby=Name")
+                .then(res => {
+                    const data = res.data['value'];
+                    const group_names = data.map((item) => { return {'label' : item.Name, 'value': item.Code}})
+
+                    this.setState({
+                        group_names: group_names
+                    })
+                })
+    }
+
     load_parameter_data = () => {
-        axios.get('https://cmc.vims.edu/odata/Groups?$expand=CmcMemberUser,CmcMemberUser2,CmcMemberUser3,ParameterGroups($select=Parameter,LabId,DetectionLimit;$expand=Parameter)&$orderby=Name')
+        axios.get('https://cmc.vims.edu/odata/Groups?$expand=ParameterGroups($select=Parameter;$expand=Parameter($select=Name))&$select=Id,Code')
             .then(res => {
                 const data = res.data['value'];
                ///const parameter_data = data.map((item) => {(item.ParameterGroups)})
-                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name) })
+                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name.toLowerCase()) })
                 const parameter_array = parameter_types.flat()
-                const unique_parameters = parameter_array.filter((x, i, a) => a.indexOf(x) === i)
-                const unique_parameters_dropdown = unique_parameters.map((item) => { return {'variable' : item}})
-
-                const group_names = data.map((item) => { return {'label' : item.Name, 'variable': item.Code}})
-
+                const unique_parameters = parameter_array.filter((x, i, a) => a.indexOf(x) === i).sort()
+                const unique_parameters_dropdown = unique_parameters.map((item) => { return {'label': item, 'value' : item} } )
 
                 this.setState({
                     parameter_data: data,
                     variables: unique_parameters_dropdown,
-                    group_names: group_names
                 })
 
             })
@@ -184,43 +188,55 @@ class Home extends PureComponent {
             '$filter': [`Event/StationId eq ${station_id} and QaFlagId eq 2`]
             }
 
-        axios.get('https://cmc.vims.edu/odata/PublicSamples', {params : get_payload})
-            .then(res => {        this.get_station_data();
-                console.log(res.data)
-            })
-
-
+        ///axios.get('https://cmc.vims.edu/odata/PublicSamples', {params : get_payload})
+        ///    .then(res => {
+        ///        this.get_station_data();
+        ///    })
     }
 
-
     update_stations = () => {
-    ///    const param_data = this.state.parameter_data;
-///
-    ///    /// parameters with a certain code for a station
-    ///    const subset_param_data = (this.state.selectedVariables === null)
-    ///                        ? param_data
-    ///                        : param_data.filter((item) => item['ParameterGroups'].some((subitem) => subitem['Parameter']['Name'] == this.state.selectedVariables))
-///
-        const subset_stations_by_group_name = (this.state.selectedGroupNames === null)
-                                                    ? this.state.all_stations_data
-                                                    : this.state.all_stations_data.filter(item => item['Code'].startsWith(this.state.selectedGroupNames))
+        console.log(this.state.selectedGroupNames)
+        console.log(this.state.selectedVariables)
 
+        let filtered_stations = this.state.all_stations_data
 
-        /// stations supplying data with those parameters (for filtering stations)
-       /// const new_stations_data = subset_param_data.map((item) => { return item['Id'] })
-       /// console.log(new_stations_data)
-///
-       /// const final_data = subset_stations_by_group_name.filter((item) => new_stations_data.includes(item['Id']))
-       /// console.log(final_data)
+        if (this.state.selectedGroupNames.length == 0 && (this.state.selectedVariables.length == 0)) {
+            console.log(filtered_stations)
+            this.setState({ stations_data : filtered_stations })
+        } else {
 
-        this.setState({ stations_data : subset_stations_by_group_name })
+            if (this.state.selectedGroupNames.length != 0) {
+                filtered_stations = this.state.all_stations_data.filter(item => this.state.selectedGroupNames.some(group_name => item['Code'].includes(group_name)))///.startsWith(this.state.selectedGroupNames))
+            }
+            /// stations supplying data with those parameters (for filtering stations)
+            if (this.state.selectedVariables.length != 0) {
+                const subset_param_data = this.state.parameter_data.filter((item) => item['ParameterGroups'].some((subitem) => subitem.Parameter.Name.toLowerCase() == this.state.selectedVariables))
+                const new_stations_data = subset_param_data.map((item) => { return item['Id'] })
+                filtered_stations = filtered_stations.filter((item) => new_stations_data.includes(item['Id']))
+            }
 
+            console.log(filtered_stations)
+            this.setState({ stations_data : filtered_stations })
+        }
+    }
+
+    change_location = (e) => {
+        const station_group = this.state.group_names.find(element => element.variable == e.Code.split('.')[0]).label;
+        const station = this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
+        station.station_group = station_group
+        this.setState({
+            selected : station
+        }, () => {
+            this.get_station_data()
+        })
     }
 
 
     componentDidMount = () => {
-        this.load_station_data();
+        this.load_all_station_data();
         this.load_parameter_data();
+        this.load_groups_data();
+        this.get_summary();
 
         this.setState({
             wqp_station_data : wqpdata
@@ -228,7 +244,6 @@ class Home extends PureComponent {
     }
 
     render() {
-
         return (
         <Container>
             <Head></Head>
@@ -238,6 +253,7 @@ class Home extends PureComponent {
                     <SideBar
                         group_names={this.state.group_names}
                         set_group_name={this.setGroupName}
+                        selected_groups={this.state.selectedGroupLabels}
                         variables={this.state.variables}
                         set_variable={this.setVariable}
                         start_date={this.state.startDate}
@@ -255,9 +271,10 @@ class Home extends PureComponent {
                         wqpdata = {this.state.wqp_station_data}
                         show_wqp = {this.state.show_wqp}
                         selected = {this.state.selected}
-                        callBack = {this.changeLocation}
+                        callBack = {this.change_location}
                     />
                 </Row>
+                <StatBar summary_data={this.state.summary_data}/>
             </Col>
             <Col style = {{height: '100vh'}}>
                  <ResultBar selected={this.state.selected}/>
