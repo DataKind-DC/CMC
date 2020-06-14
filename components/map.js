@@ -48,7 +48,6 @@ function Map(props) {
     const handleViewport = (viewport) => setViewport(viewport);
 
         return (
-            <Row style={props.style}>
                 <ReactMapGL
                     mapStyle="mapbox://styles/mapbox/outdoors-v9"
                     mapboxApiAccessToken="pk.eyJ1IjoiZGFuYmVybnN0ZWluIiwiYSI6ImNrNXM4ZGZuYzA1eGUzbnA0eGdveHZuZ2kifQ.7atp6EfK9Hp958HvKcDFKA"
@@ -61,7 +60,6 @@ function Map(props) {
                     <Markers data={props.stations_data} selected={props.selected.Id} callBack={props.callBack} />
 
                 </ReactMapGL>
-            </Row>
         );
 }
 

@@ -1,27 +1,26 @@
 import React, { Component , PureComponent } from 'react';
-import ReactMapGL, { Marker } from 'react-map-gl';
 import dynamic from 'next/dynamic'
-import cmcdata from "../public/cmcdata_subset.json"
 import Select from "react-dropdown-select";
+import { Container, Row, Col, Input, Label } from 'reactstrap';
 
-class Dropdowns extends PureComponent {
-
-    render() {
-
+function Dropdowns(props) {
         return (
-            <div style = {this.props.style} >
-                <Select
-                    clearable={true}
-                    searchable={true}
-                    placeholder={this.props.placeholder}
-                    options={this.props.options}
-                    labelField={this.props.label}
-                    value = {this.props.label}
-                    dropdownHeight="500px"
-                    onChange={this.props.callBack} />
-            </div>
+            <Row className="justify-content-md-center">
+                <div style = {{width: '80%', padding: '15px'}} >
+                    <Select
+                        style={{width: '100%'}}
+                        clearable={true}
+                        searchable={true}
+                        placeholder={props.placeholder}
+                        options={props.options}
+                        labelField={props.label}
+                        value = {props.label}
+                        dropdownHeight="200px"
+                        onChange={props.callBack} />
+                </div>
+            </Row>
+
         );
-    }
 }
 
 export default Dropdowns

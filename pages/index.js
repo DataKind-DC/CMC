@@ -7,12 +7,14 @@ import DatePicker from "react-datepicker";
 import { Container, Row, Col } from 'reactstrap';
 import Chart from "../components/dataChart"
 import 'react-dates/initialize';
-import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'react-dates';
 import moment from "moment";
 import 'moment-timezone';
 import axios from "axios";
 
-import StationSummary from '../components/stationSummaryPanel'
+import NavBar from '../components/navBar'
+import SideBar from '../components/sideBar'
+import ResultBar from '../components/resultBar'
+import StatBar from '../components/statBar'
 
 import wqpdata from "../public/wqp_stations.json"
 
@@ -30,62 +32,94 @@ class Home extends PureComponent {
         GroupNames: null,
         variables: null,
         selectedGroupNames: [],
+        selectedGroupLabels: [],
         selectedVariables: [],
-        selected: [], /// individual row selected
+        selectedUSStates: [],
+        selectedWaterBody: [],
+        selected: [],
         startDate: moment().subtract(2, "year"),
         endDate: moment(),
-        availableVariablesAtLocation: null,
-        selectedVariableAtLocation: null
+        availableVariablesAtLocation: [],
+        selectedVariableAtLocation: null,
+        summary_data: {},
+        station_sample_count: null,
+        station_sample_data: []
         };
 
 
     MarkerMap = dynamic(() => import('../components/map'), {ssr: false});
 
-    changeLocation = (e) => {
-        console.log(e.Id)
-        this.setState({
-            selected : this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
-        }, () => {
-            console.log('new')
-            this.get_station_data()
-          ///  this.updateChartData()
-        })
+    get_summary = () => {
+        const res = axios.get('https://cmc.vims.edu/odata/GetHomeStats')
+            .then(res => {
+                    this.setState({summary_data: res.data[0]})
+    })
     }
 
+///    getUnique = (e, d) => {
+///        const result = [];
+///        const map = new Map();
+///        for (const item of d) {
+///            if(!map.has(item[e])){
+///                map.set(item[e], true);    // set any value to Map
+///                var obj = {};
+///                obj[e] = item[e];
+///                result.push(obj);
+///            }
+///        }
+///        return result
+///
+///    }
+///
+    updateChartData = (e) => {
+        console.log(e)
+        const new_chart_data = this.state.station_sample_data.filter(item => item.Name == e[0].value)
+        console.log(new_chart_data)
 
-    getUnique = (e, d) => {
-        const result = [];
-        const map = new Map();
-        for (const item of d) {
-            if(!map.has(item[e])){
-                map.set(item[e], true);    // set any value to Map
-                var obj = {};
-                obj[e] = item[e];
-                result.push(obj);
-            }
-        }
-        return result
-
+            this.setState({
+                chart_data: new_chart_data,
+        })
     }
 
     setGroupName = (e) => {
         console.log(e)
-
+        const { selectedGroupNames, selectedGroupLabels } = this.state;
         this.setState({
-            selectedGroupNames: e.length !== 0 ? e[0].variable : null
+            selectedGroupNames: e.map(item => item['value'] ),
+            selectedGroupLabels: e.map(item => item.label)
         }, () => {
-        this.update_stations()
+            console.log(this.state.selectedGroupNames)
+            this.update_stations()
         })
     }
 
     setVariable = (e) => {
-        console.log(e)
-        this.setState({
-            selectedVariables: e.length !== 0 ? e[0].variable : null
+       console.log(e)
+       this.setState({
+            selectedVariables: e.map(item => item['value'] )
         }, () => {
         this.update_stations()
         })
     }
+
+    setUSState = (e) => {
+       console.log(e)
+       this.setState({
+            selectedUSStates: e.map(item => item['value'] )
+        }, () => {
+        this.update_stations()
+        })
+    }
+
+    setWaterBody = (e) => {
+       console.log(e)
+       this.setState({
+            selectedWaterBody: e.map(item => item['value'] )
+        }, () => {
+        this.update_stations()
+        })
+    }
+
 
      setDates = (startDate, endDate) => {
         this.setState({
@@ -106,7 +140,6 @@ class Home extends PureComponent {
 
 
      setVariableAtLocation = (e) => {
-        console.log(e)
         this.setState({
             selectedVariableAtLocation: e[0].variable
         }, () => {
@@ -114,62 +147,47 @@ class Home extends PureComponent {
         })
     }
 
-    updateChartData = () => {
-        console.log(this.state.selected.GroupName)
-
-        const chart_data_by_group = (this.state.selected.StationName)
-            ? cmcdata.filter((item) => item['StationName'] == this.state.selected.StationName)
-            : cmcdata
-
-        const newVariables = this.getUnique('variable', chart_data_by_group)
-
-        this.setState({
-            availableVariablesAtLocation: newVariables
-        }, () => {
-        const new_chart_data = (this.state.selectedVariableAtLocation)
-            ? chart_data_by_group.filter((item) => item['variable'] == this.state.selectedVariableAtLocation)
-            : chart_data_by_group.filter((item) => item['variable'] == this.state.availableVariablesAtLocation[0])
-
-        const chart_data = {}
-        new_chart_data.map((item) => {this.formatVals(item, chart_data)})
-
-            this.setState({
-                chart_data: chart_data,
-        })
-
-        })
-    }
-
-    load_station_data = () => {
-        axios.get('https://cmc.vims.edu/odata/Stations')
+    load_all_station_data = () => {
+        axios.get('https://cmc.vims.edu/odata/Stations?$select=Id,Code,Name,NameLong,Lat,Long,CityCounty,Fips,State,WaterBody,CreatedDate,ModifiedDate')
             .then(res => {
-                const data = res.data['value'];
-
+                const data = res.data['value']
+                let state_options = data.map((item) => { return item.State }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } )
+                let water_body_options = data.map((item) => { return item.WaterBody }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } )
                 this.setState({
                     all_stations_data: data,
                     stations_data: data,
+                    us_states: state_options,
+                    water_bodies: water_body_options
                 })
 
             })
     }
 
+    load_groups_data = () => {
+        axios.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name&$orderby=Name")
+                .then(res => {
+                    const data = res.data['value'];
+                    const group_names = data.map((item) => { return {'label' : item.Name, 'value': item.Code}})
+
+                    this.setState({
+                        group_names: group_names
+                    })
+                })
+    }
+
     load_parameter_data = () => {
-        axios.get('https://cmc.vims.edu/odata/Groups?$expand=CmcMemberUser,CmcMemberUser2,CmcMemberUser3,ParameterGroups($select=Parameter,LabId,DetectionLimit;$expand=Parameter)&$orderby=Name')
+        axios.get('https://cmc.vims.edu/odata/Groups?$expand=ParameterGroups($select=Parameter;$expand=Parameter($select=Name))&$select=Id,Code')
             .then(res => {
                 const data = res.data['value'];
                ///const parameter_data = data.map((item) => {(item.ParameterGroups)})
-                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name) })
+                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name.toLowerCase()) })
                 const parameter_array = parameter_types.flat()
-                const unique_parameters = parameter_array.filter((x, i, a) => a.indexOf(x) === i)
-                const unique_parameters_dropdown = unique_parameters.map((item) => { return {'variable' : item}})
-
-                const group_names = data.map((item) => { return {'label' : item.Name, 'variable': item.Code}})
-
+                const unique_parameters = parameter_array.filter((x, i, a) => a.indexOf(x) === i).sort()
+                const unique_parameters_dropdown = unique_parameters.map((item) => { return {'label': item, 'value' : item} } )
 
                 this.setState({
                     parameter_data: data,
                     variables: unique_parameters_dropdown,
-                    group_names: group_names
                 })
 
             })
@@ -178,109 +196,139 @@ class Home extends PureComponent {
 
     get_station_data = () => {
         const station_id = this.state.selected.Id
-        const get_payload = {
-            '?$expand': ['Event($expand=Station,Group),Parameter'],
-            '$filter': [`Event/StationId eq ${station_id} and QaFlagId eq 2`]
-            }
+        const query = `?$expand=Parameter($select=Id,Code,Name,Units,Tier)&$filter=Event/StationId eq ${station_id} and QaFlagId eq 2&$count=true&$select=Parameter,Value,CreatedDate`
+        axios.get('https://cmc.vims.edu/odata/PublicSamples' + query).then(res => {
+            console.log(res.data.value)
+            let flatten_sample_data = res.data['value'].map(item => { return Object.assign({}, ...function _flatten(o) {
+                return [].concat(...Object.keys(o).map(k =>
+                    typeof o[k] === 'object'
+                        ? _flatten(o[k])
+                        : (
+                            { [k]: o[k] }
+                            )
+                        )
+                        )
+                    } (item))
+                }
+            )
 
-        axios.get('https://cmc.vims.edu/odata/PublicSamples', {params : get_payload})
-            .then(res => {        this.get_station_data();
-                console.log(res.data)
+            flatten_sample_data = flatten_sample_data.map((item) => {
+                item['Name'] = item.Name.toLowerCase()
+                return item
+                })
+            const available_parameters = flatten_sample_data.map((item) => { return item.Name }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } )
+
+            this.setState({
+                station_sample_count: res.data['@odata.count'],
+                station_sample_data: flatten_sample_data,
+                availableVariablesAtLocation: available_parameters
             })
-
-
+        })
     }
 
-
     update_stations = () => {
-    ///    const param_data = this.state.parameter_data;
-///
-    ///    /// parameters with a certain code for a station
-    ///    const subset_param_data = (this.state.selectedVariables === null)
-    ///                        ? param_data
-    ///                        : param_data.filter((item) => item['ParameterGroups'].some((subitem) => subitem['Parameter']['Name'] == this.state.selectedVariables))
-///
-        const subset_stations_by_group_name = (this.state.selectedGroupNames === null)
-                                                    ? this.state.all_stations_data
-                                                    : this.state.all_stations_data.filter(item => item['Code'].startsWith(this.state.selectedGroupNames))
+        const filter_length = this.state.selectedGroupNames.length + this.state.selectedUSStates.length + this.state.selectedVariables.length + this.state.selectedWaterBody
 
+        let filtered_stations = this.state.all_stations_data
 
-        /// stations supplying data with those parameters (for filtering stations)
-       /// const new_stations_data = subset_param_data.map((item) => { return item['Id'] })
-       /// console.log(new_stations_data)
-///
-       /// const final_data = subset_stations_by_group_name.filter((item) => new_stations_data.includes(item['Id']))
-       /// console.log(final_data)
+        if (filter_length == 0) {
+            this.setState({ stations_data : filtered_stations })
+        } else {
+            if (this.state.selectedWaterBody.length != 0) {
+                filtered_stations = filtered_stations.filter(item => this.state.selectedWaterBody.some(water_body => item['WaterBody'] == water_body))///.startsWith(this.state.selectedGroupNames))
+            }
 
-        this.setState({ stations_data : subset_stations_by_group_name })
+            if (this.state.selectedUSStates.length != 0) {
+                filtered_stations = filtered_stations.filter(item => this.state.selectedUSStates.some(station_state => item['State'] == station_state))///.startsWith(this.state.selectedGroupNames))
+            }
 
+            if (this.state.selectedGroupNames.length != 0) {
+                filtered_stations = filtered_stations.filter(item => this.state.selectedGroupNames.some(group_name => item['Code'].includes(group_name)))///.startsWith(this.state.selectedGroupNames))
+            }
+
+            /// stations supplying data with those parameters (for filtering stations)
+            if (this.state.selectedVariables.length != 0) {
+                const subset_param_data = this.state.parameter_data.filter((item) => item['ParameterGroups'].some((subitem) => subitem.Parameter.Name.toLowerCase() == this.state.selectedVariables))
+                const new_stations_data = subset_param_data.map((item) => { return item['Id'] })
+                filtered_stations = filtered_stations.filter((item) => new_stations_data.includes(item['Id']))
+            }
+
+            ///console.log(filtered_stations)
+            this.setState({ stations_data : filtered_stations })
+        }
+    }
+
+    change_location = (e) => {
+        const station_group = this.state.group_names.find(element => element.value == e.Code.split('.')[0]).label;
+        const station = this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
+        station.station_group = station_group
+        this.setState({
+            selected : station
+        }, () => {
+            this.get_station_data()
+        })
     }
 
 
     componentDidMount = () => {
-        this.load_station_data();
+        this.load_all_station_data();
         this.load_parameter_data();
-
+        this.load_groups_data();
+        this.get_summary();
         this.setState({
             wqp_station_data : wqpdata
         })
     }
 
     render() {
-
         return (
-        <Container>
+        <Container style={{maxWidth: '100%'}}>
             <Head></Head>
-            <Row>
-            <Col xs={10} style = {{position: 'fixed'}}>
-                    <this.MarkerMap
-                        style = {{ height: '700px', width: '100%', zIndex: 1}}
-                        stations_data={this.state.stations_data}
-                       /* data = {this.state.filtered_data} */
-                        wqpdata = {this.state.wqp_station_data}
-                        show_wqp = {this.state.show_wqp}
-                        selected = {this.state.selected}
-                        callBack = {this.changeLocation}
-                    />
-            </Col>
-            <Col style = {{zIndex: 1001, position: 'relative', height: '400px', opacity: 1, margin: '10px'}} xs={4}>
-                <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', borderRadius: '25px', padding: '20px', margin: '5px'}}>
-                    <Col style = {{width: '500px'}} >
-                        <Row>
-                            <b> Filter the stations on the map by group name, parameter, or date collected. </b>
-                        </Row>
-                        <Row style={{padding: '5px'}} className="justify-content-md-center">
-                            <Dropdowns
-                                placeholder={"Select a local group..."}
-                                options={this.state.group_names}
-                                label = {'label'}
-                                callBack={this.setGroupName} />
-                        </Row>
-                        <Row style={{padding: '5px'}} className="justify-content-md-center">
-                            <Dropdowns
-                                placeholder={"Select a parameter..."}
-                                options={this.state.variables}
-                                label = {'variable'}
-                                callBack={this.setVariable} />
-                        </Row>
-                        <Row style={{paddingtop: '10px'}} className="justify-content-md-center">
-                            <DateRangePicker
-                                  startDate={this.state.startDate}
-                                  startDateId="your_unique_start_date_id"
-                                  endDate={this.state.endDate}
-                                  endDateId="your_unique_end_date_id"
-                                  onDatesChange={({ startDate, endDate }) => this.setDates(startDate, endDate)}
-                                  focusedInput={this.state.focusedInput}
-                                  onFocusChange={focusedInput => this.setState({ focusedInput })}
+                <NavBar />
+                    <Row style = {{height: '600px', padding: '0px'}}>
+                    <Col xs={3} >
+                        <SideBar
+                                group_names={this.state.group_names}
+                                set_group_name={this.setGroupName}
+                                selected_groups={this.state.selectedGroupLabels}
+                                variables={this.state.variables}
+                                set_variable={this.setVariable}
+                                us_states={this.state.us_states}
+                                set_us_states={this.setUSState}
+                                selected_us_states={this.state.selectedUSStates}
+                                water_bodies={this.state.water_bodies}
+                                set_water_bodies={this.setWaterBody}
+                                selected_water_bodies={this.state.selectedWaterBody}
+                                start_date={this.state.startDate}
+                                end_date={this.state.endDate}
+                                set_dates={({ startDate, endDate }) => this.setDates(startDate, endDate)}
+                                wqp_status={this.state.show_wqp}
+                                toggle_wqp={() => this.setState({show_wqp: !this.state.show_wqp})}
+                            />
+                    </Col>
+                    <Col xs={6} style={{height: '700px'}} >
+                        <Row style={{height: '70%'}}>
+                            <this.MarkerMap
+                                style = {{ width: '100%'}}
+                                stations_data={this.state.stations_data}
+                                wqpdata = {this.state.wqp_station_data}
+                                show_wqp = {this.state.show_wqp}
+                                selected = {this.state.selected}
+                                callBack = {this.change_location}
                             />
                         </Row>
+                        <StatBar summary_data={this.state.summary_data}/>
                     </Col>
-                </Row>
-                 <Row className="justify-content-md-center" style={{ border : "solid 1px #b1b5b5", backgroundColor: 'white', borderRadius: '25px', padding: '10px'}}>
-                 <StationSummary station = {this.state.selected} />
-                 </Row>
-            </Col>
-         </Row>
+                    <Col xs={3} style = {{height: '700px'}}>
+                         <ResultBar
+                            selected={this.state.selected}
+                            samples={this.state.station_sample_count}
+                            available_parameters={this.state.availableVariablesAtLocation}
+                            update_chart_data={this.updateChartData}
+                            chart_data={this.state.chart_data}
+                         />
+                    </Col>
+             </Row>
          </Container>
         );
     }
