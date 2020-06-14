@@ -12,6 +12,10 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.9.2",
+    "@fortawesome/fontawesome-svg-core": "^1.2.28",
+    "@fortawesome/free-regular-svg-icons": "^5.13.0",
+    "@fortawesome/free-solid-svg-icons": "^5.13.0",
+    "@fortawesome/react-fontawesome": "^0.1.10",
     "@vtex/react-csv-parse": "^3.0.2",
     "@zeit/next-css": "^1.0.1",
     "axios": "^0.19.2",

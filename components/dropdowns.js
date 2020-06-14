@@ -1,21 +1,25 @@
 import React, { Component , PureComponent } from 'react';
-import ReactMapGL, { Marker } from 'react-map-gl';
 import dynamic from 'next/dynamic'
-
-const Select = dynamic(
-          () => import('react-select').then((mod) => mod.default),
-          {
-            ssr: false,
-            loading: () => null,
-          },
-        );
+import Select from "react-dropdown-select";
+import { Container, Row, Col, Input, Label } from 'reactstrap';
 
 function Dropdowns(props) {
         return (
+            <Row className="justify-content-md-center">
+                <div style = {{width: '80%', padding: '15px'}} >
                     <Select
-                        isMulti={true}
+                        style={{width: '100%'}}
+                        clearable={true}
+                        searchable={true}
+                        placeholder={props.placeholder}
                         options={props.options}
-                    />
+                        labelField={props.label}
+                        value = {props.label}
+                        dropdownHeight="200px"
+                        onChange={props.callBack} />
+                </div>
+            </Row>
+
         );
 }
 

@@ -40,9 +40,16 @@ groups
 after = json.loads(requests.get("https://cmc.vims.edu/odata/Groups?$filter=Id eq 176").content)
 
 # get specific group attributes
-after = json.loads(requests.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name").content)
+after = json.loads(requests.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name,State").content)
 after
 len(groups['value'])
 
 
-json.loads(requests.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name&$orderby=Name").content)
+
+# what they do
+json.loads(requests.get('https://cmc.vims.edu/odata/PublicSamples?$expand=Event($expand=Station,Group),Parameter&$filter=Event/StationId%20eq%202362%20%20and%20QaFlagId%20eq%202').content)
+
+# get number of samples at a given station
+json.loads(requests.get('https://cmc.vims.edu/odata/PublicSamples?$expand=Event($expand=Station($select=Id,Code,NameLong),Group($select=Id)),Parameter&$filter=Event/StationId eq 2330 and QaFlagId eq 2').content)
+
+json.loads(requests.get('https://cmc.vims.edu/odata/PublicSamples?$expand=Parameter($select=Id,Code,Name,Units,Tier)&$filter=Event/StationId eq 2330 and QaFlagId eq 2&$count=true&$select=CreatedDate,Depth,Parameter,Id,Value').content)
