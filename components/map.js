@@ -1,5 +1,9 @@
 import React, { Component , PureComponent, useState } from 'react';
-import ReactMapGL, { Popup, Marker } from 'react-map-gl';
+import ReactMapGL, {
+  Marker, 
+  NavigationControl,
+  ScaleControl 
+} from 'react-map-gl';
 import CityPin from '../components/pin';
 import { Container, Row, Col } from 'reactstrap';
 
@@ -44,6 +48,19 @@ function Map(props) {
             zoom: 6
       }
 
+    const navStyle = {
+       position: 'absolute',
+       bottom: 40,
+       right: 4,
+       padding: '4px'
+    }
+
+    const scaleControlStyle = {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+    }
+
     const [viewport, setViewport] = useState(default_viewport);
     const handleViewport = (viewport) => setViewport(viewport);
 
@@ -58,7 +75,12 @@ function Map(props) {
                         : <div></div>
                         }
                     <Markers data={props.stations_data} selected={props.selected.Id} callBack={props.callBack} />
-
+                    <div style={navStyle}>
+                        <NavigationControl showCompass={false} />
+                    </div>
+                    <div style={scaleControlStyle}>
+                        <ScaleControl unit={"imperial"} maxWidth={80} />
+                    </div>
                 </ReactMapGL>
         );
 }
