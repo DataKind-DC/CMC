@@ -1,9 +1,10 @@
 // pages/_app.js
 import "react-datepicker/dist/react-datepicker.css";
 import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-daterangepicker/daterangepicker.css'
+import 'bootstrap-daterangepicker/daterangepicker.css';
 import 'react-dates/lib/css/_datepicker.css';
-import "react-toggle/style.css" 
+import "react-toggle/style.css";
+import "mapbox-gl/dist/mapbox-gl.css";
 
 export default function MyApp({ Component, pageProps }) {
   return <Component {...pageProps} />
