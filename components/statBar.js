@@ -26,9 +26,9 @@ function StatBar(props) {
         })
 
         const show_data = select_vars.map(item => (
-            <Col style={{paddingBottom: '10px'}}>
+            <Col style={{paddingTop: '10px'}}>
                 <Row style={{justifyContent: 'center'}}>
-                    <b style={{fontSize: '20px'}}> {item.value} </b>
+                    <b style={{fontSize: '20px'}}> {parseFloat(item.value).toLocaleString()} </b>
                 </Row>
                 <Row style={{justifyContent: 'center'}}>
                     <p> {item.label} </p>
@@ -39,7 +39,7 @@ function StatBar(props) {
             )
 
         return (
-                <Row xs={4} style={{ border : "solid 1px #DEDEDE", backgroundColor: 'white', height: '200px' }}>
+                <Row xs={4} style={{ borderRight : "solid 1px #DEDEDE", borderLeft:  "solid 1px #DEDEDE", backgroundColor: 'white', height: '200px' }}>
                     {show_data}
                 </Row>
         );

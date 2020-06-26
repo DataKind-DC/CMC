@@ -1,6 +1,6 @@
 // pages/_app.js
-import "react-datepicker/dist/react-datepicker.css";
 import 'bootstrap/dist/css/bootstrap.css';
+import 'rc-slider/assets/index.css';
 import 'bootstrap-daterangepicker/daterangepicker.css';
 import 'react-dates/lib/css/_datepicker.css';
 import "react-toggle/style.css";

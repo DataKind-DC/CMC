@@ -6,7 +6,6 @@ import Dropdowns from "../components/dropdowns"
 
 
 function Chart(props) {
-    console.log(props.chart_data)
     const new_data = props.chart_data.length
         ? props.chart_data.reduce((acc, item) => {
             acc[item['CreatedDate']] = item['Value']
@@ -14,11 +13,10 @@ function Chart(props) {
             }, {})
         : {}
 
-    console.log(new_data)
-
     return (
         <div>
              <Dropdowns
+                multi={false}
                 placeholder={"Select a parameter at this station..."}
                 options={props.available_parameters}
                 label = {'label'}

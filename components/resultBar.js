@@ -27,8 +27,8 @@ function StationSummary(props) {
                     <br />
                     <br />
                     <p> <b> Monitored by: </b>  {station.station_group} </p>
-                    <p> <b> First sampled: </b> {DateTime.fromISO(station.CreatedDate.replace('Z', '')).toLocaleString(DateTime.DATE_MED)} </p>
-                    <p> <b> Most recently sampled: </b> {DateTime.fromISO(station.ModifiedDate.replace('Z', '')).toLocaleString(DateTime.DATE_MED)} </p>
+                    <p> <b> First sampled: </b> {station.CreatedDate.toLocaleString(DateTime.DATE_MED)} </p>
+                    <p> <b> Most recently sampled: </b> {station.ModifiedDate.toLocaleString(DateTime.DATE_MED)} </p>
                 </Col>
                 : <Col> </Col>
             }
@@ -38,15 +38,15 @@ function StationSummary(props) {
 
 
 function StationParameterSummary(props) {
-    const { samples } = props;
+    const { station } = props;
     return (
         <Row className="align-items-center">
-        {samples != null
+        {station.EventCount != null
             ? <Col>
                 <div >
                     <b> Total samples collected </b>
                     <br />
-                    <b> {samples} </b>
+                    <b> {station.EventCount} </b>
                 </div>
               </Col>
             : <p> </p>
@@ -58,13 +58,13 @@ function StationParameterSummary(props) {
 function ResultBar(props) {
     return (
         <div>
-            {props.selected.length !== 0
+            {Object.keys(props.selected).length !== 0
                 ? <div>
                     <StationSummary station = {props.selected} />
-                    <StationParameterSummary samples={props.samples}/>
+                    <StationParameterSummary station={props.selected}/>
                     <Chart chart_data={props.chart_data} update_chart_data={props.update_chart_data} available_parameters={props.available_parameters} />
                   </div>
-                : <p> Select a station to learn more </p>
+                : <p> </p>
             }
         </div>
     );
