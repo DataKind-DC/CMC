@@ -30,6 +30,9 @@ function NavBar(props){
           <NavbarText>
               <NavLink href="https://cmc.vims.edu/Home/About">About CMC</NavLink>
           </NavbarText>
+          <NavbarText>
+              <NavLink onClick={props.toggle_modal}>Parameter Definitions</NavLink>
+          </NavbarText>
         </Collapse>
       </Navbar>
   );

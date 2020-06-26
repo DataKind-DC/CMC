@@ -2,20 +2,32 @@ import React, { Component , PureComponent } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { Container, Row, Col, Input, Label } from 'reactstrap';
-import { DateRangePicker, SingleDatePicker, DayPickerRangeController } from 'react-dates';
+import { Container, Row, Col, Input, Label, CustomInput, Button } from 'reactstrap';
 import moment from "moment";
 import 'moment-timezone';
 import Toggle from 'react-toggle';
+import Slider, { createSliderWithTooltip } from 'rc-slider';
+import { Calendar } from 'react-date-range';
+import DateRangePicker from 'react-bootstrap-daterangepicker';
+
 
 import Dropdowns from "../components/dropdowns"
+
+const SliderWithTooltip = createSliderWithTooltip(Slider);
 
 
 function SideBar(props) {
         return (
-            <Row middle="xs" style={{ alignItems: 'center', justifyContent: 'center', 'minHeight' : '100%' , backgroundColor: 'white'}}>
+            <Row middle="xs" style={{ alignItems: 'center', justifyContent: 'center', 'minHeight' : '100%' }}>
                 <Col middle="xs">
-                    <div style={{ }} >
+                    <div>
+                        <Row className="justify-content-md-center">
+                        <DateRangePicker startDate={props.start_date} endDate={props.end_date} onApply={props.set_dates}>
+                            <input type="text" name="daterange" value={props.start_date.toLocaleString() + ' - ' + props.end_date.toLocaleString()} />
+                        </DateRangePicker>
+                        </Row>
+
+
                         <Dropdowns
                             placeholder={"Select a local group..."}
                             options={props.group_names}
@@ -25,9 +37,10 @@ function SideBar(props) {
 
                         <Dropdowns
                             placeholder={"Select a parameter..."}
-                            options={props.variables}
+                            options={props.parameters}
                             label = {'label'}
-                            callBack={props.set_variable} />
+                            callBack={props.set_variable}
+                            />
 
                         <Dropdowns
                                 placeholder={"Select a state..."}
@@ -43,23 +56,30 @@ function SideBar(props) {
                                 label = {'label'}
                                 callBack={props.set_water_bodies} />
 
+
                         <Row style={{paddingTop: '10px'}} className="justify-content-md-center">
-                            <DateRangePicker
-                                  startDate={props.start_date}
-                                  startDateId="your_unique_start_date_id"
-                                  endDate={props.end_date}
-                                  endDateId="your_unique_end_date_id"
-                                  onDatesChange={props.set_dates}
-                            />
+                            <Label> Filter by minimum number of samples: {props.sample_threshold} </Label>
+                            <SliderWithTooltip style={{width:'60%'}}
+                                min={0}
+                                max={100}
+                                onChange={props.change_sample_threshold}
+                                value={props.sample_threshold}
+                                defaultValue={5}
+                                />
                         </Row>
+
                         <Row style={{paddingTop: '20px'}} className="justify-content-md-center">
                             <Toggle
                               id='toggle_wqp_layer'
-                              defaultChecked={props.wqp_status}
+                              defaultChecked={props.show_wqp}
                               icons={false}
                               onClick={props.toggle_wqp}
                             />
-                            <Label htmlFor='toggle_wqp_layer'>Display WQP stations</Label>
+                            <Label
+                                style={{paddingLeft: '10px'}}
+                                htmlFor='toggle_wqp_layer'>
+                                Display WQP stations
+                            </Label>
                         </Row>
                     </div>
                 </Col>
