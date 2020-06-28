@@ -22,7 +22,7 @@ function NavBar(props){
 
   return (
       <Navbar style={{width: '100%'}} color="light" light expand="md">
-        <NavbarBrand href="/">CMC Data Explorer</NavbarBrand>
+        <NavbarBrand style={{fontWeight: 500}} href="/">CMC Data Explorer</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
           <Nav>
