@@ -21,7 +21,9 @@ function SideBar(props) {
             <Row middle="xs" style={{ alignItems: 'center', justifyContent: 'center', 'minHeight' : '100%' }}>
                 <Col middle="xs">
                     <div>
+                        <h5 style={{ justifyContent: 'center', paddingBottom: '0.5rem' }} className="font-weight-light" >Filter stations</h5>
                         <Row className="justify-content-md-center">
+                        <Label>By date: &nbsp;</Label>
                         <DateRangePicker startDate={props.start_date} endDate={props.end_date} onApply={props.set_dates}>
                             <input type="text" name="daterange" value={props.start_date.toLocaleString() + ' - ' + props.end_date.toLocaleString()} />
                         </DateRangePicker>
@@ -29,36 +31,36 @@ function SideBar(props) {
 
 
                         <Dropdowns
-                            placeholder={"Select a local group..."}
+                            placeholder={"By local group..."}
                             options={props.group_names}
                             selected={props.selected_groups}
                             label = {'label'}
                             callBack={props.set_group_name} />
 
                         <Dropdowns
-                            placeholder={"Select a parameter..."}
+                            placeholder={"By parameter..."}
                             options={props.parameters}
                             label = {'label'}
                             callBack={props.set_variable}
                             />
 
                         <Dropdowns
-                                placeholder={"Select a state..."}
-                                options={props.us_states}
-                                selected={props.selected_state}
-                                label = {'label'}
-                                callBack={props.set_us_states} />
+                            placeholder={"By state..."}
+                            options={props.us_states}
+                            selected={props.selected_state}
+                            label = {'label'}
+                            callBack={props.set_us_states} />
 
                         <Dropdowns
-                                placeholder={"Select a water body..."}
-                                options={props.water_bodies}
-                                selected={props.selected_water_bodies}
-                                label = {'label'}
-                                callBack={props.set_water_bodies} />
+                            placeholder={"By water body..."}
+                            options={props.water_bodies}
+                            selected={props.selected_water_bodies}
+                            label = {'label'}
+                            callBack={props.set_water_bodies} />
 
 
                         <Row style={{paddingTop: '10px'}} className="justify-content-md-center">
-                            <Label> Filter by minimum number of samples: {props.sample_threshold} </Label>
+                            <Label> By minimum number of samples: {props.sample_threshold} </Label>
                             <SliderWithTooltip style={{width:'60%'}}
                                 min={0}
                                 max={100}
