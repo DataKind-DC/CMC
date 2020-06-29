@@ -65,10 +65,18 @@ class Home extends PureComponent {
     }
 
     updateChartData = (e) => {
-        const new_chart_data = this.state.station_sample_data.filter(item => item.Name == e[0].value)
-        this.setState({
+        if (e.length) {
+            const new_chart_data = this.state.station_sample_data.filter(
+                item => item.Name == e[0].value
+            )
+            this.setState({
                 chart_data: new_chart_data,
-        })
+            })
+        } else {
+            this.setState({
+                chart_data: []
+            })
+        }
     }
 
     set_parameter_definition = (e) => {
