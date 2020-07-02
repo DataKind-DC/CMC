@@ -43,8 +43,6 @@ after
 # get specific group attributes
 after = json.loads(requests.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name,State").content)
 after
-len(groups['value'])
-
 
 
 # what they do
