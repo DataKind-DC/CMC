@@ -6,6 +6,8 @@ import 'react-dates/lib/css/_datepicker.css';
 import "react-toggle/style.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+
 export default function MyApp({ Component, pageProps }) {
   return <Component {...pageProps} />
 }
