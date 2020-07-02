@@ -1,11 +1,12 @@
 import React, { Component , PureComponent, useState } from 'react';
-import ReactMapGL, {
+import MapGL, {
   Marker, 
   NavigationControl,
   ScaleControl 
-} from 'react-map-gl';
+} from '@urbica/react-map-gl';
 import CityPin from '../components/pin';
 import { Container, Row, Col } from 'reactstrap';
+import Draw from '@urbica/react-map-gl-draw';
 
 
 function Markers(props) {
@@ -39,7 +40,7 @@ function WqpMarkers(props) {
     )
 }
 
-function Map(props) {
+function MarkerMap(props) {
     const default_viewport = {
             width: "100%",
             height: "100%",
@@ -55,19 +56,17 @@ function Map(props) {
        padding: '4px'
     }
 
-    const scaleControlStyle = {
-      position: 'absolute',
-      top: 0,
-      right: 0,
-    }
-
     const [viewport, setViewport] = useState(default_viewport);
     const handleViewport = (viewport) => setViewport(viewport);
 
+    const [mode, setMode] = useState('simple_select');
+    const [features, setFeatures] = useState([]);
+
         return (
-                <ReactMapGL
+                <MapGL
+                    style={{ width: '100%', height: '100%' }}
                     mapStyle="mapbox://styles/mapbox/outdoors-v9"
-                    mapboxApiAccessToken="pk.eyJ1IjoiZGFuYmVybnN0ZWluIiwiYSI6ImNrNXM4ZGZuYzA1eGUzbnA0eGdveHZuZ2kifQ.7atp6EfK9Hp958HvKcDFKA"
+                    accessToken="pk.eyJ1IjoiZGFuYmVybnN0ZWluIiwiYSI6ImNrNXM4ZGZuYzA1eGUzbnA0eGdveHZuZ2kifQ.7atp6EfK9Hp958HvKcDFKA"
                     onViewportChange={handleViewport}
                     {...viewport}>
                     {props.show_wqp
@@ -78,11 +77,18 @@ function Map(props) {
                     <div style={navStyle}>
                         <NavigationControl showCompass={false} />
                     </div>
-                    <div style={scaleControlStyle}>
-                        <ScaleControl unit={"imperial"} maxWidth={80} />
-                    </div>
-                </ReactMapGL>
+                      <NavigationControl showCompass showZoom position='bottom-right' />
+                    <Draw
+                        mode={mode}
+                        pointControl={false}
+                        combineFeaturesControl={false}
+                        lineStringControl={false}
+                        uncombineFeaturesControl={false}
+                        onDrawCreate={({ features }) => props.on_draw_area({ features })}
+                        onDrawUpdate={({ features }) => props.on_draw_area({ features })}
+                        onDrawModeChange={({ mode }) => setMode(mode)} />
+                </MapGL>
         );
 }
 
-export default Map;
+export default MarkerMap;

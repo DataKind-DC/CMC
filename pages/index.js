@@ -12,7 +12,9 @@ import 'moment-timezone';
 import axios from "axios";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { DateTime } from 'luxon';
-
+import inside from '@turf/boolean-point-in-polygon'
+import { point } from '@turf/helpers'
+import _ from "lodash"
 
 import NavBar from '../components/navBar'
 import SideBar from '../components/sideBar'
@@ -42,6 +44,7 @@ class Home extends PureComponent {
         selected_water_bodies: [],
         selected_tidal: [],
         selected_huc6_names: [],
+        drawn_areas: [],
         selected: {},
         start_date: DateTime.local().minus({years: 2}),
         end_date: DateTime.local(),
@@ -55,7 +58,6 @@ class Home extends PureComponent {
         parameter_definition: null,
         selected_parameter_definition: null
         };
-
 
     MarkerMap = dynamic(() => import('../components/map'), {ssr: false});
 
@@ -97,8 +99,6 @@ class Home extends PureComponent {
     }
 
     setDates = (start_date, end_date) => {
-        console.log(start_date)
-        console.log(end_date)
         this.setState({
             start_date : start_date,
             end_date : end_date
@@ -252,12 +252,9 @@ class Home extends PureComponent {
     }
 
     update_stations = () => {
-        console.log(this.state.selected_tidal)
-        const filter_length = this.state.selected_group_names.length + this.state.selected_us_states.length + this.state.selected_parameters.length + this.state.selected_water_bodies + this.state.sample_threshold + this.state.selected_tidal.length + this.state.selected_huc6_names.length
-
+        const filter_length = this.state.selected_group_names.length + this.state.selected_us_states.length + this.state.selected_parameters.length + this.state.selected_water_bodies + this.state.sample_threshold + this.state.selected_tidal.length + this.state.selected_huc6_names.length + this.state.drawn_areas.length
         let filtered_stations = this.state.all_stations_data
         filtered_stations = filtered_stations.filter(item => item.ModifiedDate >= this.state.start_date)
-        console.log(filtered_stations)
 
         if (filter_length == 0) {
             this.setState({ stations_data : filtered_stations })
@@ -285,6 +282,10 @@ class Home extends PureComponent {
             if (this.state.sample_threshold > 0) {
                 filtered_stations = filtered_stations.filter(item => item.EventCount > this.state.sample_threshold)
             }
+            console.log(this.state.drawn_areas[0])
+            if (this.state.drawn_areas.length != 0) {
+                filtered_stations = filtered_stations.filter(item => this.state.drawn_areas.some(filter_item => inside(point(Object.values(_.pick(item, ['Long', 'Lat']))), filter_item['features'][0])))
+            }
 
             /// stations supplying data with those parameters (for filtering stations)
             if (this.state.selected_parameters.length != 0) {
@@ -302,6 +303,8 @@ class Home extends PureComponent {
     }
 
     change_station = (e) => {
+        console.log(this.state.group_names)
+        console.log(e)
         const station_group = this.state.group_names.find(element => element.value == e.Code.split('.')[0]).label;
         const station = this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
         station.station_group = station_group
@@ -321,6 +324,7 @@ class Home extends PureComponent {
             })
         this.update_stations()
     }
+
 
     componentDidMount = () => {
         this.load_all_station_data();
@@ -347,7 +351,6 @@ class Home extends PureComponent {
                                 us_states={this.state.us_states}
                                 water_bodies={this.state.water_bodies}
                                 huc6_names={this.state.huc6_name_options}
-
                                 selected_group_names={this.state.selectedGroupLabels}
                                 selected_us_states={this.state.selected_us_states}
                                 selected_water_bodies={this.state.selected_water_bodies}
@@ -370,17 +373,21 @@ class Home extends PureComponent {
                             />
                     </Col>
                     <Col xs={6} style={{height: '700px'}} >
-                        <Row style={{height: '70%'}}>
+                        <Row style={{height: '80%'}}>
                             <this.MarkerMap
                                 style = {{ width: '100%'}}
                                 stations_data={this.state.stations_data}
                                 wqpdata = {this.state.wqp_station_data}
+                                drawn_areas={this.state.drawn_areas}
+                                on_draw_area={(e)  => { console.log(e);
+                                                        this.setState({ drawn_areas: [...this.state.drawn_areas, e] });
+                                                        this.update_stations()}}
                                 show_wqp = {this.state.show_wqp}
                                 selected = {this.state.selected}
                                 callBack = {this.change_station}
                             />
                         </Row>
-                        <StatBar summary_data={this.state.summary_data}/>
+                        <StatBar height='20%' summary_data={this.state.summary_data}/>
                     </Col>
                     <Col xs={3} style = {{height: '700px'}}>
                          <ResultBar
