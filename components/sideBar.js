@@ -27,11 +27,10 @@ function SideBar(props) {
                         </DateRangePicker>
                         </Row>
 
-
                         <Dropdowns
                             placeholder={"Select a local group..."}
                             options={props.group_names}
-                            selected={props.selected_groups}
+                            selected={props.selected_group_names}
                             label = {'label'}
                             callBack={props.set_group_name} />
 
@@ -56,6 +55,18 @@ function SideBar(props) {
                                 label = {'label'}
                                 callBack={props.set_water_bodies} />
 
+                        <Dropdowns
+                                placeholder={"Select tidal or non-tidal..."}
+                                options={[{'label': 'Tidal', 'value' : true}, {'label': 'Non-Tidal', 'value' : false}]}
+                                selected={props.selected_tidal}
+                                label = {'label'}
+                                callBack={props.set_tidal} />
+                        <Dropdowns
+                                placeholder={"Select a HUC"}
+                                options={props.huc6_names}
+                                selected={props.selected_huc6_names}
+                                label = {'label'}
+                                callBack={props.set_huc6_names} />
 
                         <Row style={{paddingTop: '10px'}} className="justify-content-md-center">
                             <Label> Filter by minimum number of samples: {props.sample_threshold} </Label>
