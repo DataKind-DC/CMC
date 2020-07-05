@@ -21,12 +21,12 @@ function StationSummary(props) {
 
         {station.length !== 0 ?
                 <Col style={{paddingTop: '10px'}}>
-                    <b> Station Details: {station.NameLong} </b>
+                    <b> {station.NameLong !== null ? station.NameLong : station.Name } </b>
                     <br />
                     <i> {station.CityCounty}, {station.State} </i>
                     <br />
                     <br />
-                    <p> <b> Monitored by: </b>  {station.station_group} </p>
+                    <p> <b> Monitored by: </b>  {station.GroupNames} </p>
                     <p> <b> First sampled: </b> {station.CreatedDate.toLocaleString(DateTime.DATE_MED)} </p>
                     <p> <b> Most recently sampled: </b> {station.ModifiedDate.toLocaleString(DateTime.DATE_MED)} </p>
                 </Col>
@@ -56,13 +56,19 @@ function StationParameterSummary(props) {
 }
 
 function ResultBar(props) {
+    console.log(props.unit)
     return (
         <div>
             {Object.keys(props.selected).length !== 0
                 ? <div>
                     <StationSummary station = {props.selected} />
                     <StationParameterSummary station={props.selected}/>
-                    <Chart chart_data={props.chart_data} update_chart_data={props.update_chart_data} available_parameters={props.available_parameters} />
+                    <Chart
+                        chart_data={props.chart_data}
+                        update_chart_data={props.update_chart_data}
+                        available_parameters={props.available_parameters}
+                        unit={props.unit}
+                    />
                   </div>
                 : <p> </p>
             }

@@ -16,7 +16,7 @@ function NavBar(props){
   const toggle = () => setIsOpen(!isOpen);
 
   return (
-      <Navbar style={{width: '100%'}} color="light" light expand="md">
+      <Navbar color="light" light expand="md">
         <NavbarBrand style={{fontWeight: 500}} href="/">CMC Data Explorer</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>

@@ -68,17 +68,34 @@ class Home extends PureComponent {
     })
     }
 
+    mode = (array) => {
+        let set = Array.from(new Set(array));
+        let counts = set.map(a=>array.filter(b=>b==a).length);
+        if (counts.length > 1) {
+        let indices = counts.map((a,b)=>Math.max(...counts)===a?b:0).filter(b=>b!==0);
+        let mode = indices.map(a=>set[a]);
+        return mode;
+        } else {
+            return set[0]
+        }
+    }
+
     updateChartData = (e) => {
         if (e.length) {
             const new_chart_data = this.state.station_sample_data.filter(
                 item => item.Name == e[0].value
             )
+            console.log(this.mode(new_chart_data.map((item) => { return item.Units }).flat()))
+            const y_axis = this.mode(new_chart_data.map((item) => { return item.Units }).flat())
+
             this.setState({
                 chart_data: new_chart_data,
+                y_axis: y_axis
             })
         } else {
             this.setState({
-                chart_data: []
+                chart_data: [],
+                y_axis: ''
             })
         }
     }
@@ -94,7 +111,7 @@ class Home extends PureComponent {
        this.setState({
             [variable]: e.map(item => item['value'] )
         }, () => {
-        this.update_stations()
+        this.filter_stations()
         })
     }
 
@@ -103,7 +120,7 @@ class Home extends PureComponent {
             start_date : start_date,
             end_date : end_date
         }, () => {
-        this.update_stations()
+        this.filter_stations()
         })
     }
 
@@ -115,66 +132,55 @@ class Home extends PureComponent {
         })
     }
 
-    mergeById = (a1, a2) => {
-        return a1.map(itm => ({
-            ...a2.find((item) => (item.StationId === itm.Id) && item),
+    mergeById = (a, b, merge_a, merge_b) => {
+        return a.map(itm => ({
+            ...b.find((item) => (item[merge_b] === itm[merge_a]) && item),
             ...itm
         }));
     }
 
-    load_station_richness = (stations) => {
-        axios.get('https://cmc.vims.edu/odata/GetBenthicStationRichness')
-                    .then(res => {
-                        let benthic_richness = res.data.map((item) => (({ StationId, EventCount }) => ({ StationId, EventCount }))(item))
-                        });
-        axios.get('https://cmc.vims.edu/odata/GetStationRichness')
-                    .then(res => {
-                        const data = res.data
-                        let station_richness = data.map((item) => (({ StationId, EventCount }) => ({ StationId, EventCount }))(item))
-                        const new_station_data = this.mergeById(stations, station_richness).filter(function (el) {
-                            return el.EventCount >= 0
-                            });
-                        return new_station_data
-
-                        });
-    }
-
     load_all_station_data = () => {
-        axios.get('https://cmc.vims.edu/odata/Stations?$select=Id,Code,Name,NameLong,Lat,Long,CityCounty,Fips,State,WaterBody,CreatedDate,ModifiedDate,Tidal,Huc6Name')
-            .then(res => {
-                const data = res.data['value']
-                let state_options = data.map((item) => { return item.State }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } )
-                let water_body_options = data.map((item) => { return item.WaterBody }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } )
-                let huc6_name_options = data.map((item) => { return item.Huc6Name }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } )
+        axios.all([
+            axios.get('https://cmc.vims.edu/odata/GetBenthicStationRichness'),
+            axios.get('https://cmc.vims.edu/odata/GetStationRichness'),
+            axios.get('https://cmc.vims.edu/odata/Stations?$select=Id,Code,Name,NameLong,Lat,Long,CityCounty,Fips,State,WaterBody,CreatedDate,ModifiedDate,Tidal,Huc6Name')
+        ])
+            .then(axios.spread((benthic, notBenthic, stations) => {
+                let benthic_richness = benthic.data.map((item) => (({ StationId, EventCount, GroupNames }) => ({ StationId, EventCount, GroupNames }))(item))
+                let station_richness = notBenthic.data.map((item) => (({ StationId, EventCount, GroupNames }) => ({ StationId, EventCount, GroupNames }))(item))
+                const all_richness = this.mergeById(station_richness, benthic_richness, 'StationId', 'StationId')
 
-                axios.get('https://cmc.vims.edu/odata/GetStationRichness')
-                    .then(res => {
-                        const rich_data = res.data
-                        let station_richness = rich_data.map((item) => (({ StationId, EventCount }) => ({ StationId, EventCount }))(item))
-                        let new_station_data = this.mergeById(data, station_richness).filter(function (el) {
+                const data = stations.data['value'];
+                let state_options = data.map((item) => { return item.State }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } );
+                let water_body_options = data.map((item) => { return item.WaterBody }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } );
+                let huc6_name_options = data.map((item) => { return item.Huc6Name }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } );
+
+                let new_station_data = this.mergeById(data, all_richness, 'Id', "StationId").filter(function (el) {
                             return el.EventCount >= 0
                             });
 
-                        new_station_data.map(item => {
-                            item['ModifiedDate'] = DateTime.fromISO(item['ModifiedDate'])
-                            item['CreatedDate'] = DateTime.fromISO(item['CreatedDate'])
-                        })
+                new_station_data.map(item => {
+                    item['ModifiedDate'] = DateTime.fromISO(item['ModifiedDate'])
+                    item['CreatedDate'] = DateTime.fromISO(item['CreatedDate'])
+                })
 
-                        this.setState({
-                            all_stations_data: new_station_data,
-                            us_states: state_options,
-                            water_bodies: water_body_options,
-                            huc6_name_options: huc6_name_options
-                        })
+                console.log(new_station_data)
 
-                        this.update_stations()
 
-                        this.state.stations_data.length !== 0
-                        ? this.change_station(this.state.stations_data[0])
-                        : console.log('no stations available')
-                        });
-            })
-    }
+                this.setState({
+                    all_stations_data: new_station_data,
+                    us_states: state_options,
+                    water_bodies: water_body_options,
+                    huc6_name_options: huc6_name_options
+                })
+
+                this.filter_stations()
+
+                this.state.stations_data.length !== 0
+                ? this.change_station(this.state.stations_data[0])
+                : console.log('no stations available')
+                }))
+            }
 
     load_groups_data = () => {
         axios.get("https://cmc.vims.edu/odata/Groups?$select=Id,Code,Name&$orderby=Name")
@@ -192,13 +198,15 @@ class Home extends PureComponent {
         axios.get('https://cmc.vims.edu/odata/Groups?$expand=ParameterGroups($select=Parameter;$expand=Parameter($select=Name))&$select=Id,Code')
             .then(res => {
                 const data = res.data['value'];
-                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name.toLowerCase()) })
+                const parameters_by_station = data.map((item) => { return { 'Code': item.Code, 'Parameters' : item.ParameterGroups.map((subitem) => subitem.Parameter.Name.toLowerCase()) } } )
+
+                const parameter_types = data.map((item) => { return item.ParameterGroups.map((subitem) => subitem.Parameter.Name.toLowerCase()) } )
                 const parameter_array = parameter_types.flat().filter(item => !(item.includes(' blank')))
                 const unique_parameters = parameter_array.filter((x, i, a) => a.indexOf(x) === i).sort()
                 const unique_parameters_dropdown = unique_parameters.map((item) => { return {'label': item, 'value' : item} } )
 
                 this.setState({
-                    parameter_data: data,
+                    parameter_data: parameters_by_station,
                     parameters: unique_parameters_dropdown,
                 })
             })
@@ -251,8 +259,9 @@ class Home extends PureComponent {
         })
     }
 
-    update_stations = () => {
+    filter_stations = () => {
         const filter_length = this.state.selected_group_names.length + this.state.selected_us_states.length + this.state.selected_parameters.length + this.state.selected_water_bodies + this.state.sample_threshold + this.state.selected_tidal.length + this.state.selected_huc6_names.length + this.state.drawn_areas.length
+
         let filtered_stations = this.state.all_stations_data
         filtered_stations = filtered_stations.filter(item => item.ModifiedDate >= this.state.start_date)
 
@@ -282,32 +291,24 @@ class Home extends PureComponent {
             if (this.state.sample_threshold > 0) {
                 filtered_stations = filtered_stations.filter(item => item.EventCount > this.state.sample_threshold)
             }
-            console.log(this.state.drawn_areas[0])
+
             if (this.state.drawn_areas.length != 0) {
                 filtered_stations = filtered_stations.filter(item => this.state.drawn_areas.some(filter_item => inside(point(Object.values(_.pick(item, ['Long', 'Lat']))), filter_item['features'][0])))
             }
 
             /// stations supplying data with those parameters (for filtering stations)
             if (this.state.selected_parameters.length != 0) {
-                console.log(this.state.parameter_data)
-                const subset_param_data = this.state.parameter_data.filter((item) => item.ParameterGroups.filter((subitem) =>
-                    this.state.selected_parameters.some((selectVar) => subitem.Parameter.Name.toLowerCase() === subitem)))
-                console.log(subset_param_data)
-                const new_stations_data = subset_param_data.map((item) => { return item['Id'] }).flat()
-                console.log(new_stations_data)
-                filtered_stations = filtered_stations.filter(item => new_stations_data.includes(item['Id']))
-                console.log(filtered_stations)
+                const subset_stations_with_selected_parameters = this.state.parameter_data.filter((item) => item.Parameters.some((parameter_list) => this.state.selected_parameters.includes(parameter_list))).map((item) => { return item['Code'] })
+                filtered_stations = filtered_stations.filter(item => subset_stations_with_selected_parameters.includes(item['Code'].split('.')[0]))
             }
             this.setState({ stations_data : filtered_stations })
         }
     }
 
     change_station = (e) => {
-        console.log(this.state.group_names)
         console.log(e)
-        const station_group = this.state.group_names.find(element => element.value == e.Code.split('.')[0]).label;
         const station = this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
-        station.station_group = station_group
+        console.log(station)
         this.setState({
             selected: station
         }, () => {
@@ -322,7 +323,19 @@ class Home extends PureComponent {
             start_date: DateTime.fromJSDate(picker.startDate.toDate()),
             end_date: DateTime.fromJSDate(picker.endDate.toDate())
             })
-        this.update_stations()
+        this.filter_stations()
+    }
+
+    draw_area = (e) => {
+        console.log(this.state.drawn_areas);
+        this.setState({ drawn_areas: [...this.state.drawn_areas, e] });
+        this.filter_stations()
+    }
+
+    delete_area = (e) => {
+        const new_drawn_areas = this.state.drawn_areas.filter(item => item.features[0].id != e.features[0].id)
+        this.setState({ drawn_areas: new_drawn_areas })
+        this.filter_stations()
     }
 
 
@@ -338,12 +351,12 @@ class Home extends PureComponent {
 
     render() {
         return (
-        <Container style={{maxWidth: '100%'}}>
+        <Container style={{maxWidth: '100%', padding: 0}}>
             <Head></Head>
                 <NavBar
                     toggle_modal = {this.toggle_modal}
                 />
-                    <Row style = {{height: '600px', padding: '0px'}}>
+                    <Row style = {{padding: '0px'}}>
                     <Col xs={3} >
                         <SideBar
                                 group_names={this.state.group_names}
@@ -362,26 +375,25 @@ class Home extends PureComponent {
                                 set_dates={this.set_dates}
 
 
-                                set_variable={e => this.setDropdownValue(e, 'selected_variables')}
+                                set_variable={e => this.setDropdownValue(e, 'selected_parameters')}
                                 set_group_name={e => this.setDropdownValue(e, 'selected_group_names')}
                                 set_us_states={e => this.setDropdownValue(e, 'selected_us_states')}
                                 set_water_bodies={e => this.setDropdownValue(e, 'selected_water_bodies')}
                                 set_tidal={e => this.setDropdownValue(e, 'selected_tidal')}
                                 set_huc6_names={e => this.setDropdownValue(e, 'selected_huc6_names')}
-                                change_sample_threshold={(value) => { this.setState({sample_threshold: value}); this.update_stations()}}
+                                change_sample_threshold={(value) => { this.setState({sample_threshold: value}); this.filter_stations()}}
                                 toggle_wqp={() => this.setState({show_wqp: !this.state.show_wqp})}
                             />
                     </Col>
-                    <Col xs={6} style={{height: '700px'}} >
+                    <Col xs={6} >
                         <Row style={{height: '80%'}}>
                             <this.MarkerMap
                                 style = {{ width: '100%'}}
                                 stations_data={this.state.stations_data}
                                 wqpdata = {this.state.wqp_station_data}
                                 drawn_areas={this.state.drawn_areas}
-                                on_draw_area={(e)  => { console.log(e);
-                                                        this.setState({ drawn_areas: [...this.state.drawn_areas, e] });
-                                                        this.update_stations()}}
+                                on_draw_area={this.draw_area}
+                                on_delete_area={this.delete_area}
                                 show_wqp = {this.state.show_wqp}
                                 selected = {this.state.selected}
                                 callBack = {this.change_station}
@@ -396,6 +408,7 @@ class Home extends PureComponent {
                             available_parameters={this.state.availableVariablesAtLocation}
                             update_chart_data={this.updateChartData}
                             chart_data={this.state.chart_data}
+                            unit={this.state.y_axis}
                          />
                     </Col>
                     <div>

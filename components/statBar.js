@@ -27,13 +27,15 @@ function StatBar(props) {
         })
 
         const show_data = select_vars.map(item => (
-            <Col style={{paddingTop: '10px'}}>
+            <Col >
+                <div >
                 <Row style={{justifyContent: 'center'}}>
                     <b style={{fontSize: '20px'}}> {parseFloat(item.value).toLocaleString()} </b>
                 </Row>
                 <Row style={{justifyContent: 'center'}}>
                     <p> {item.label} </p>
                 </Row>
+                </div>
              { /*   <FontAwesomeIcon size='md' icon={item.icon} /> */}
             </Col>
             )
