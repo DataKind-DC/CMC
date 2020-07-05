@@ -84,9 +84,11 @@ function MarkerMap(props) {
                         combineFeaturesControl={false}
                         lineStringControl={false}
                         uncombineFeaturesControl={false}
+
                         onDrawCreate={({ features }) => props.on_draw_area({ features })}
                         onDrawUpdate={({ features }) => props.on_draw_area({ features })}
-                        onDrawModeChange={({ mode }) => setMode(mode)} />
+                        onDrawDelete={({ features }) => props.on_delete_area({ features })}
+                    />
                 </MapGL>
         );
 }
