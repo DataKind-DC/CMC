@@ -19,7 +19,7 @@ class CityPin extends PureComponent {
       <svg
         height={size}
         viewBox="0 0 24 24"
-        style={{... pinStyle, fill: this.props.fill, opacity: this.props.opacity, transform: `translate(${-size / 2}px,${-size}px)`}}
+        style={{... pinStyle, fill: this.props.fill, opacity: this.props.opacity, transform: `translate(0px,${-size/2}px)`}}
         onClick={this.props.onClick}
       >
         <path d={ICON}/>
