@@ -29,6 +29,8 @@ function StationSummary(props) {
                     <p> <b> Monitored by: </b>  {station.GroupNames} </p>
                     <p> <b> First sampled: </b> {station.CreatedDate.toLocaleString(DateTime.DATE_MED)} </p>
                     <p> <b> Most recently sampled: </b> {station.ModifiedDate.toLocaleString(DateTime.DATE_MED)} </p>
+                    <p> <b> Total samples collected </b>: {station.EventCount}  </p>
+
                 </Col>
                 : <Col> </Col>
             }
@@ -37,24 +39,6 @@ function StationSummary(props) {
 }
 
 
-function StationParameterSummary(props) {
-    const { station } = props;
-    return (
-        <Row className="align-items-center">
-        {station.EventCount != null
-            ? <Col>
-                <div >
-                    <b> Total samples collected </b>
-                    <br />
-                    <b> {station.EventCount} </b>
-                </div>
-              </Col>
-            : <p> </p>
-            }
-        </Row>
-    );
-}
-
 function ResultBar(props) {
     console.log(props.unit)
     return (
@@ -62,7 +46,6 @@ function ResultBar(props) {
             {Object.keys(props.selected).length !== 0
                 ? <div>
                     <StationSummary station = {props.selected} />
-                    <StationParameterSummary station={props.selected}/>
                     <Chart
                         chart_data={props.chart_data}
                         update_chart_data={props.update_chart_data}
