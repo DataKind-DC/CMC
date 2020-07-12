@@ -3,21 +3,20 @@ import dynamic from 'next/dynamic'
 import Select from "react-dropdown-select";
 import { Container, Row, Col, Input, Label } from 'reactstrap';
 
+import RSelect from "react-select";
+
 function Dropdowns(props) {
+    console.log(props.options)
         return (
             <Row className="justify-content-md-center">
-                <div style = {{width: '80%', padding: '15px'}} >
-                    <Select
-                        style={{width: '100%'}}
-                        clearable={true}
-                        searchable={true}
+                <div style = {{width: '100%', padding: '15px'}} >
+                    <RSelect 
+                        options={props.options ? props.options : []}
                         placeholder={props.placeholder}
-                        options={props.options}
-                        labelField={props.label}
-                        value = {props.label}
-                        dropdownHeight="200px"
+                        isMulti={true}
+                        label={props.label}
                         onChange={props.callBack}
-                        multi={props.multi ? props.multi : true} />
+                    />
                 </div>
             </Row>
 
