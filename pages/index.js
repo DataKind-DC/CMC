@@ -61,12 +61,12 @@ class Home extends PureComponent {
 
     MarkerMap = dynamic(() => import('../components/map'), {ssr: false});
 
-    get_summary = () => {
-        const res = axios.get('https://cmc.vims.edu/odata/GetHomeStats')
-            .then(res => {
-                    this.setState({summary_data: res.data[0]})
-    })
-    }
+    // get_summary = () => {
+    //     const res = axios.get('https://cmc.vims.edu/odata/GetHomeStats')
+    //         .then(res => {
+    //                 this.setState({summary_data: res.data[0]})
+    // })
+    // }
 
     mode = (array) => {
         let set = Array.from(new Set(array));
@@ -147,7 +147,15 @@ class Home extends PureComponent {
         ])
             .then(axios.spread((benthic, notBenthic, stations) => {
                 let benthic_richness = benthic.data.map((item) => (({ StationId, EventCount, GroupNames }) => ({ StationId, EventCount, GroupNames }))(item))
+                benthic_richness.map(station => {
+                    delete Object.assign(station, {['BenthicEventCount']: station.EventCount})['EventCount']
+                })
+                
                 let station_richness = notBenthic.data.map((item) => (({ StationId, EventCount, GroupNames }) => ({ StationId, EventCount, GroupNames }))(item))
+                station_richness.map(station => {
+                    delete Object.assign(station, {['WaterQualityEventCount']: station.EventCount})['EventCount']
+                })
+
                 const all_richness = this.mergeById(station_richness, benthic_richness, 'StationId', 'StationId')
 
                 const data = stations.data['value'];
@@ -305,6 +313,25 @@ class Home extends PureComponent {
         }
     }
 
+    set_summary_data = () => {
+        const stations_data = this.state.stations_data
+        
+        const water_quality_stations = stations_data.filter(station => station.hasOwnProperty('waterQualityEventsCount'))
+        const water_quality_events_count = water_quality_stations.reduce((total, station) => total + station.WaterQualityEventCount, 0)
+// set both to events, name stats accordingly
+        const benthic_stations = stations_data.filter(station => station.hasOwnProperty('benthicEventCount'))
+        const benthic_sample_event_count = benthic_stations.reduce((total, station) => total + station.BenthicEventCount, 0)
+        
+        this.setState({
+            summary_data: {
+                StationCount: water_quality_stations.length,
+                SamplesCount: water_quality_events_count,
+                BenthicStationCount: benthic_stations.length,
+                BenthicSamplesCount: benthic_sample_event_count
+            }
+        })
+    }
+
     change_station = (e) => {
         console.log(e)
         const station = this.state.stations_data.filter((item)=> item.Id == e.Id)[0]
@@ -343,7 +370,7 @@ class Home extends PureComponent {
         this.load_all_station_data();
         this.load_parameter_data();
         this.load_groups_data();
-        this.get_summary();
+        // this.get_summary();
         this.setState({
             wqp_station_data : wqpdata
         })
