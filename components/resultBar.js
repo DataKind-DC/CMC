@@ -29,7 +29,8 @@ function StationSummary(props) {
                     <p> <b> Monitored by: </b>  {station.GroupNames} </p>
                     <p> <b> First sampled: </b> {station.CreatedDate.toLocaleString(DateTime.DATE_MED)} </p>
                     <p> <b> Most recently sampled: </b> {station.ModifiedDate.toLocaleString(DateTime.DATE_MED)} </p>
-                    <p> <b> Total samples collected </b>: {station.EventCount}  </p>
+                    <p> <b> Total samples collected </b>: {station.WaterQualityEventCount ? station.WaterQualityEventCount : 0}  </p>
+                    <p> <b> Total benthic samples collected </b>: {station.BenthicEventCount ? station.BenthicEventCount : 0} </p>
 
                 </Col>
                 : <Col> </Col>

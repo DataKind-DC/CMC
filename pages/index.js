@@ -164,7 +164,7 @@ class Home extends PureComponent {
                 let huc6_name_options = data.map((item) => { return item.Huc6Name }).flat().filter((x, i, a) => a.indexOf(x) === i).sort().map((item) => { return {'label': item, 'value' : item} } );
 
                 let new_station_data = this.mergeById(data, all_richness, 'Id', "StationId").filter(function (el) {
-                            return el.EventCount >= 0
+                            return el.WaterQualityEventCount >= 0 || el.BenthicEventCount >= 0
                             });
 
                 new_station_data.map(item => {
@@ -297,7 +297,13 @@ class Home extends PureComponent {
             }
 
             if (this.state.sample_threshold > 0) {
-                filtered_stations = filtered_stations.filter(item => item.EventCount > this.state.sample_threshold)
+                // this maybe should be for two filters?
+                filtered_stations = filtered_stations.filter(item => {
+                    let totalEvents = 0
+                    item.hasOwnProperty('BenthicEventCount') ? totalEvents += item.BenthicEventCount : null
+                    item.hasOwnProperty('WaterQualityEventCount') ? totalEvents += item.WaterQualityEventCount : null
+                    return totalEvents >= this.state.sample_threshold
+                })
             }
 
             if (this.state.drawn_areas.length != 0) {
@@ -311,17 +317,20 @@ class Home extends PureComponent {
             }
             this.setState({ stations_data : filtered_stations })
         }
+
+        this.set_summary_data()
     }
 
     set_summary_data = () => {
         const stations_data = this.state.stations_data
-        
-        const water_quality_stations = stations_data.filter(station => station.hasOwnProperty('waterQualityEventsCount'))
+        console.log('stations data length', stations_data.length)
+
+        const water_quality_stations = stations_data.filter(station => station.hasOwnProperty('WaterQualityEventCount'))
         const water_quality_events_count = water_quality_stations.reduce((total, station) => total + station.WaterQualityEventCount, 0)
 // set both to events, name stats accordingly
-        const benthic_stations = stations_data.filter(station => station.hasOwnProperty('benthicEventCount'))
+        const benthic_stations = stations_data.filter(station => station.hasOwnProperty('BenthicEventCount'))
         const benthic_sample_event_count = benthic_stations.reduce((total, station) => total + station.BenthicEventCount, 0)
-        
+        console.log('wqs length', water_quality_stations.length, 'b len', benthic_stations)
         this.setState({
             summary_data: {
                 StationCount: water_quality_stations.length,
@@ -330,6 +339,7 @@ class Home extends PureComponent {
                 BenthicSamplesCount: benthic_sample_event_count
             }
         })
+        console.log('Did the thing', this.state.summary_data)
     }
 
     change_station = (e) => {
