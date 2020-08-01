@@ -28,7 +28,7 @@
     "fs": "0.0.1-security",
     "jquery": "^3.5.0",
     "json-loader": "^0.5.7",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "luxon": "^1.23.0",
     "mapbox-gl": "^1.11.0",
     "moment": "^2.24.0",
