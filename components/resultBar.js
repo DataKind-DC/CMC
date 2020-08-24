@@ -41,7 +41,6 @@ function StationSummary(props) {
 
 
 function ResultBar(props) {
-    console.log(props.unit)
     return (
         <div>
             {Object.keys(props.selected).length !== 0

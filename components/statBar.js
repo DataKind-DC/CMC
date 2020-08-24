@@ -11,8 +11,8 @@ import { faWater , faClock, faUserClock, faUsers, faTable, faUser, faStar } from
 function StatBar(props) {
         let select_vars = [
         ///   { variable: 'MonitorHoursSum', label: 'Monitoring Hours', icon: faUserClock },
-            { variable: 'StationCount', label: 'Stations', icon: faStar },
-            { variable: 'SamplesCount', label: 'Samples', icon: faTable },
+            { variable: 'StationCount', label: 'Water Stations', icon: faStar },
+            { variable: 'SamplesCount', label: 'Water Samples', icon: faTable },
         ///    { variable: 'WaterBodyCount', label: 'Rivers/Streams', icon: faWater },
             { variable: 'BenthicStationCount', label: 'Benthic Stations', icon: faStar },
             { variable: 'BenthicSamplesCount', label: 'Benthic Samples', icon: faTable },

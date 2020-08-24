@@ -53,7 +53,8 @@ class Home extends PureComponent {
         summary_data: {},
         station_sample_count: null,
         station_sample_data: [],
-        sample_threshold: 5,
+        water_quality_sample_threshold: 5,
+        benthic_sample_threshold: 0,
         show_modal: false,
         parameter_definition: null,
         selected_parameter_definition: null
@@ -172,9 +173,6 @@ class Home extends PureComponent {
                     item['CreatedDate'] = DateTime.fromISO(item['CreatedDate'])
                 })
 
-                console.log(new_station_data)
-
-
                 this.setState({
                     all_stations_data: new_station_data,
                     us_states: state_options,
@@ -268,10 +266,21 @@ class Home extends PureComponent {
     }
 
     filter_stations = () => {
-        const filter_length = this.state.selected_group_names.length + this.state.selected_us_states.length + this.state.selected_parameters.length + this.state.selected_water_bodies + this.state.sample_threshold + this.state.selected_tidal.length + this.state.selected_huc6_names.length + this.state.drawn_areas.length
+        const filter_length = 
+            this.state.selected_group_names.length + 
+            this.state.selected_us_states.length + 
+            this.state.selected_parameters.length + 
+            this.state.selected_water_bodies.length + 
+            this.state.water_quality_sample_threshold +
+            this.state.benthic_sample_threshold + 
+            this.state.selected_tidal.length + 
+            this.state.selected_huc6_names.length + 
+            this.state.drawn_areas.length
 
+        console.log('Filter length: ', filter_length)
         let filtered_stations = this.state.all_stations_data
-        filtered_stations = filtered_stations.filter(item => item.ModifiedDate >= this.state.start_date)
+        console.log('Length of all stations:', this.state.all_stations_data.length, " Length of filtered stations:", this.state.stations_data.length)
+        // filtered_stations = filtered_stations.filter(item => item.ModifiedDate >= this.state.start_date)
 
         if (filter_length == 0) {
             this.setState({ stations_data : filtered_stations })
@@ -296,14 +305,12 @@ class Home extends PureComponent {
                 filtered_stations = filtered_stations.filter(item => this.state.selected_tidal.some(filter_item => item['Tidal'] == filter_item))
             }
 
-            if (this.state.sample_threshold > 0) {
-                // this maybe should be for two filters?
-                filtered_stations = filtered_stations.filter(item => {
-                    let totalEvents = 0
-                    item.hasOwnProperty('BenthicEventCount') ? totalEvents += item.BenthicEventCount : null
-                    item.hasOwnProperty('WaterQualityEventCount') ? totalEvents += item.WaterQualityEventCount : null
-                    return totalEvents >= this.state.sample_threshold
-                })
+            if (this.state.water_quality_sample_threshold > 0) {
+                filtered_stations = filtered_stations.filter(item => item.WaterQualityEventCount  >= this.state.water_quality_sample_threshold)
+            }
+            
+            if (this.state.benthic_sample_threshold > 0) {
+                filtered_stations = filtered_stations.filter(item => item.BenthicEventCount  >= this.state.benthic_sample_threshold)
             }
 
             if (this.state.drawn_areas.length != 0) {
@@ -408,7 +415,8 @@ class Home extends PureComponent {
                                 end_date={this.state.end_date}
                                 date_range={this.state.date_range}
                                 show_wqp={this.state.show_wqp}
-                                sample_threshold={this.state.sample_threshold}
+                                water_quality_sample_threshold={this.state.water_quality_sample_threshold}
+                                benthic_sample_threshold={this.state.benthic_sample_threshold}
                                 set_dates={this.set_dates}
 
 
@@ -418,7 +426,8 @@ class Home extends PureComponent {
                                 set_water_bodies={e => this.setDropdownValue(e, 'selected_water_bodies')}
                                 set_tidal={e => this.setDropdownValue(e, 'selected_tidal')}
                                 set_huc6_names={e => this.setDropdownValue(e, 'selected_huc6_names')}
-                                change_sample_threshold={(value) => { this.setState({sample_threshold: value}); this.filter_stations()}}
+                                change_water_quality_sample_threshold={(value) => { this.setState({water_quality_sample_threshold: value}); this.filter_stations()}}
+                                change_benthic_sample_threshold={(value) => {this.setState({'benthic_sample_threshold': value}); this.filter_stations()}}
                                 toggle_wqp={() => this.setState({show_wqp: !this.state.show_wqp})}
                             />
                     </Col>

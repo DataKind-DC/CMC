@@ -69,15 +69,27 @@ function SideBar(props) {
                                 callBack={props.set_huc6_names} />
 
                         <Row style={{paddingTop: '10px'}} className="justify-content-md-center">
-                            <Label> Filter by minimum number of samples: {props.sample_threshold} </Label>
+                            <Label> Minimum water quality samples: {props.water_quality_sample_threshold} </Label>
                             <SliderWithTooltip style={{width:'60%'}}
                                 min={0}
                                 max={100}
-                                onChange={props.change_sample_threshold}
-                                value={props.sample_threshold}
+                                onChange={props.change_water_quality_sample_threshold}
+                                value={props.water_quality_sample_threshold}
                                 defaultValue={5}
                                 />
                         </Row>
+
+                        <Row style={{paddingTop: '10px'}} className="justify-content-md-center">
+                            <Label> Minimum benthic samples: {props.benthic_sample_threshold} </Label>
+                            <SliderWithTooltip style={{width:'60%'}}
+                                min={0}
+                                max={100}
+                                onChange={props.change_benthic_sample_threshold}
+                                value={props.benthic_sample_threshold}
+                                defaultValue={0}
+                                />
+                        </Row>
+
 
                         <Row style={{paddingTop: '20px'}} className="justify-content-md-center">
                             <Toggle
