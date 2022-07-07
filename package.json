@@ -31,7 +31,7 @@
     "lodash": "^4.17.21",
     "luxon": "^1.23.0",
     "mapbox-gl": "^1.11.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.28",
     "multiselect-react-dropdown": "^1.5.0",
     "next": "11.1.0",
